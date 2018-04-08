@@ -44,7 +44,7 @@ app.get('/getHistory', (req, res) => {
         executeQuery(selectQuery).then((record) => {
             const months = Enumerable.from(record).select(x => x.month_name).distinct().toArray();
             const years = Enumerable.from(record).select(x => x.year).distinct().toArray();
-            const expenses = Enumerable.from(record).where(x => x.month_name == currentMonth() && x.year == currentYear()).toArray();
+            const expenses = Enumerable.from(record).where(x => x.month_name == currentMonth() && x.year == currentYear() && x.total_expense_amount != null).toArray();
             res.send(JSON.stringify({ months: months, years: years, expenses: expenses }));
         });
     }
@@ -61,7 +61,7 @@ app.get('/getHistoryForMonthAndYear', (req, res) => {
         const selectQuery = `select* from expense_manager where user_id='${userId}' and month_name='${month.toLowerCase()}' 
         and year=${year}`;
         executeQuery(selectQuery).then((record) => {
-            res.send(JSON.stringify(record));
+            res.send(JSON.stringify(Enumerable.from(record).where(x => x.total_expense_amount != null).toArray()));
         });
     }
 });

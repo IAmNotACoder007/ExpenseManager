@@ -48,6 +48,13 @@ class History extends Component {
 
         this.populateDistributionTable = () => {
             const distributionContainer = document.getElementById('historyDistributionTable');
+            if (!this.expenses.length) {
+                document.getElementsByClassName("total-expense-amount")[0].style.display = 'none';
+                document.getElementById("noExpenseFound").style.display = "flex";
+                return;
+            }
+            document.getElementById("noExpenseFound").style.display = "none";
+            document.getElementsByClassName("total-expense-amount")[0].style.display = 'flex';
             this.expenses.forEach((element, index) => {
                 let lastColumnClass = '';
                 if (this.expenses.length == index + 1) {
@@ -130,6 +137,7 @@ class History extends Component {
                         </DropDownMenu>
                         <div id="historyDistributionTable" className="history-distribution-table"></div>
                         <div className="total-expense-amount">Total Expense: {this.state.totalExpense}</div>
+                        <div id="noExpenseFound" className="no-expense-found" style={{ display: 'none' }}> No expense found for selected month and year</div>
                     </Paper>
                 </MuiThemeProvider>
 

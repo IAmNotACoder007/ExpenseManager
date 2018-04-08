@@ -9,8 +9,7 @@ import Toolbar from './Toolbar'
 class App extends Component {
   constructor() {
     super();
-    this.userId = cookie.load("userId");;
-
+    this.userId = cookie.load("userId");
   }
   render() {
     const socket = openSocket('http://127.0.0.1:8080');
