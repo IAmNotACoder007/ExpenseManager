@@ -66,6 +66,20 @@ app.get('/getHistoryForMonthAndYear', (req, res) => {
     }
 });
 
+app.get('/getOverview', (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+        console.error("userId is not found in request query string.");
+        res.send(null);
+    } else {
+        const selectQuery = `select* from expense_manager where user_id='${userId}' and month_name='${currentMonth().toLowerCase()}' 
+        and year=${currentYear()}`;
+        executeQuery(selectQuery).then((record) => {
+            res.send(JSON.stringify(record));
+        });
+    }
+})
+
 io.on('connection', (client) => {
     console.log('listening on port ', port);
     client.on("dologin", function (data) {
