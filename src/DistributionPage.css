@@ -1,0 +1,65 @@
+.expense-distributions {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px;
+}
+
+.expense-distributions:hover {
+    background: rgb(211, 211, 211);
+    cursor: pointer;
+}
+
+.distribution-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.distribution-table {     
+    font-size: 15px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: auto auto 65px 65px;
+}
+
+.distribution-table div {
+    padding: 10px;
+    display: flex;    
+    align-items: center;
+    line-height: 30px;
+    border-bottom: 1px solid rgb(224, 224, 224);
+}
+.distribution-table .expense-area{
+    font-weight: bold;
+}
+
+.distribution-table div.last-column{
+    border: none
+}
+
+.add-new-link {
+    padding: 11px;
+    display: flex;
+    justify-content: flex-end;
+    
+}
+
+
+.colored-row {
+    background: #F5F5DC;
+}
+
+.icons-container .material-icons{
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.material-icons:hover{
+    background-color: rgba(153, 153, 153, 0.2);
+    cursor: pointer;
+}

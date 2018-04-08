@@ -1,0 +1,39 @@
+.history-page-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.history-distribution-table{
+    display: grid;
+    grid-template-columns: auto auto 65px;
+    margin: 20px;
+    font-size: 15px;
+}
+.history-distribution-table .expense-area{
+    font-weight: bold;
+}
+
+.history-distribution-table div.row{
+    line-height: 30px;
+    border-bottom: 1px solid rgb(224, 224, 224);
+    padding: 10px;
+}
+
+.history-distribution-table div.last-column{
+    border: none
+}
+.total-expense-amount{
+    font-size: 15px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;   
+    color: rgb(255, 64, 129);
+    text-transform: uppercase;
+}
+/*.history-distribution-table div:hover{
+    cursor: pointer;
+    background-color: rgba(153, 153, 153, 0.2);         
+}*/

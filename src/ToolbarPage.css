@@ -1,0 +1,11 @@
+.page-container {
+    height: 100%;
+    width: 95%;
+    display: flex;
+    flex-direction: row;
+}
+
+.page-content {
+    height: 100%;
+    width: 100%;
+}

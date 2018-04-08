@@ -1,0 +1,55 @@
+.overview-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; 
+    align-items: center;    
+    height: 100%;
+    font-family: arial;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 100%;
+}
+
+.current-Month{
+    font-size: 35px;
+   
+}
+.total-Expense{
+    font-size: 60px;
+    margin-left: 105px;
+}
+.overall{
+    font-size: 23px;
+}
+.total-Expense-left{
+    font-size: 20px;
+}
+
+.separator{
+    border:1px solid rgb(211,211,211);
+    height: 80%;
+}
+
+.summary-chart-title{
+    font-size: 25px;
+}
+
+.summary{
+    width: 48%;
+    float: left;
+}
+
+.summary-chart{
+    width: 48%;
+    float: right;
+}
+
+.expense{
+    font-size: 25px;
+    padding-bottom: 15px;
+}
+
+.expenseArea{
+    font-size: 22px;
+    font-family: verdana;
+}
