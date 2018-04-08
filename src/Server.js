@@ -275,7 +275,11 @@ io.on('connection', (client) => {
             else totalExpense = parseFloat(data.amount);
             const updateQuery = `update expense_manager set total_expense_amount=${totalExpense} where id='${id}'`;
             executeQuery(updateQuery).then(() => {
-                client.emit("expenseAdded");
+                const query = `select* from expense_manager where user_id='${data.userId}' and month_name='${currentMonth().toLowerCase()}' 
+                and year=${currentYear()}`
+                executeQuery(query).then((record) => {
+                    client.emit("expenseAdded", JSON.stringify(record));
+                });
             })
         })
     });

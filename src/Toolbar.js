@@ -93,8 +93,7 @@ class Toolbar extends Component {
                 return;
             }
             const expenseArea = this.state.expenseAreas[this.state.selectedExpense - 1];
-            socket.emit("addExpense", { expenseArea: expenseArea, amount: amount });
-            console.log(`${expenseArea} and ${amount}`);
+            socket.emit("addExpense", { expenseArea: expenseArea, amount: amount, userId: userId });
             this.closeDialog();
 
         }
@@ -236,7 +235,7 @@ class Toolbar extends Component {
                             autoHideDuration={3000}
                             onRequestClose={this.handleNotificationClose}
                             bodyStyle={notificationStyle}
-                            //anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                        //anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                         />
                     </MuiThemeProvider>
                     <div id="pageContent" className="page-content">

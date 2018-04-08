@@ -28,6 +28,10 @@ class History extends Component {
             totalExpense: 0
         }
 
+        socket.on("expenseAdded",(data)=>{
+            this.refreshHistory(JSON.parse(data));
+        })
+
         this.getMonthsMenu = () => {
             let menus = [];
             for (let i = 0; i < this.monthNames.length; i++) {
@@ -70,15 +74,15 @@ class History extends Component {
 
         this.handleMonthChange = (event, index, value) => {
             this.setState({ selectedMonth: value });
-            this.refreshHistoryTable(value, undefined);
+            this.getHistory(value, undefined);
         }
 
         this.handleYearChange = (event, index, value) => {
             this.setState({ selectedYear: value });
-            this.refreshHistoryTable(undefined, value);
+            this.getHistory(undefined, value);
         }
 
-        this.refreshHistoryTable = (month, year) => {
+        this.getHistory = (month, year) => {
             const selectedMonth = this.monthNames[(month || this.state.selectedMonth) - 1];
             const selectedYear = this.years[(year || this.state.selectedYear) - 1];
 
@@ -88,19 +92,26 @@ class History extends Component {
                 data: { userId: this.userId, month: selectedMonth, year: selectedYear },
                 success: (data) => {
                     const history = JSON.parse(data);
-                    this.expenses = [];
-                    document.getElementById('historyDistributionTable').innerHTML = '';
-                    history.forEach((expense, index) => {
-                        this.expenses.push({ expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount });
-                    });
-                    const totalExpense = Enumerable.from(this.expenses).select(x => x.totalExpense).sum();
-                    this.setState({ totalExpense: totalExpense });
-                    this.populateDistributionTable();
+                    this.refreshHistory(history);
                 },
                 error: (xhr, status, err) => {
                     console.error(this.props.url, status, err.toString());
                 }
             });
+        }
+
+        this.refreshHistory = (history) => {
+            const historyTable=document.getElementById('historyDistributionTable');
+            if(!historyTable) return;
+            history=Enumerable.from(history).where(x=>x.total_expense_amount != null).toArray();
+            this.expenses = [];
+            historyTable.innerHTML = '';
+            history.forEach((expense, index) => {
+                this.expenses.push({ expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount });
+            });
+            const totalExpense = Enumerable.from(this.expenses).select(x => x.totalExpense).sum();
+            this.setState({ totalExpense: totalExpense });
+            this.populateDistributionTable();
         }
 
 
@@ -153,14 +164,10 @@ class History extends Component {
             success: (data) => {
                 const history = JSON.parse(data);
                 this.monthNames = history.months;
-                this.years = history.years;
-                history.expenses.forEach((expense, index) => {
-                    this.expenses.push({ expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount })
-                });
-                const totalExpense = Enumerable.from(this.expenses).select(x => x.totalExpense).sum();
+                this.years = history.years;               
                 const monthToSelect = history.months.findIndex(m => this.months[this.date.getMonth()].toLowerCase() === m.toLowerCase());
-                this.setState({ totalExpense: totalExpense, selectedMonth: monthToSelect + 1, selectedYear: history.years.indexOf(this.date.getFullYear()) + 1 });
-                this.populateDistributionTable();
+                this.setState({ selectedMonth: monthToSelect + 1, selectedYear: history.years.indexOf(this.date.getFullYear()) + 1 });
+                this.refreshHistory(history.expenses);
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());
