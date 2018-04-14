@@ -57,7 +57,7 @@ class Login extends Component {
             if (!userName) this.setState({ userNameErrorText: 'username or email must be specified.' });
             if (!password) this.setState({ passwordErrorText: 'password must be specified.' });
             if (isAuthenticUser) {
-                socket.emit('dologin', { userName: userName, password: password });
+                socket.emit('doLogin', { userName: userName, password: password });
                 socket.on('validUser', (data) => {
                     this.setCookie("userId", data[0].id);
                     ReactDOM.render(<Toolbar socket={socket} userId={data[0].id}/>, document.getElementById('main-page-container'));
@@ -83,7 +83,7 @@ class Login extends Component {
             const isValid = (email && fullName && userName && mobileNumber && password);
             if (isValid) {
                 this.setState({ showSpinner: 'block', disabledButton: true });
-                socket.emit('signin', {
+                socket.emit('signIn', {
                     email: email,
                     fullName: fullName,
                     userName: userName,

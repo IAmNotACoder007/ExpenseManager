@@ -129,7 +129,7 @@ class Distribution extends Component {
             distributionTable.innerHTML = "";
             this.expenses = [];
             distributions.forEach((distribution) => {
-                this.expenses.push({ id: distribution.id, expenseArea: distribution.expense_area, totalExpense: distribution.allocated_expense_amonut });
+                this.expenses.push({ id: distribution.id, expenseArea: distribution.expense_area, totalExpense: distribution.allocated_expense_amount });
             });
             this.populateDistributionTable();
             distributionTable.onclick = this.onClick.bind(this);

@@ -15,6 +15,12 @@ const config = {
     database: 'Expense Manager'
 };
 
+const configForDynamicQuery = {
+    user: 'sa',
+    password: 'admin123',
+    server: 'DESKTOP-LR002GL',
+};
+
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -82,65 +88,34 @@ app.get('/getOverview', (req, res) => {
 
 io.on('connection', (client) => {
     console.log('listening on port ', port);
-    client.on("dologin", function (data) {
-        sql.close();//close existing connection
-        sql.connect(config, function (err) {
-            if (err) console.log(err);
-            else {
-                console.log("connected to mssql.");
-                // create Request object
-                var request = new sql.Request();
-
-                // query to the database and get the records
-                const query = `select * from users_info where email='${data.username}' OR username='${data.userName}' AND pass='${data.password}'`;
-                request.query(query, function (err, recordset) {
-                    if (err) console.log(err)
-                    else {
-                        if (recordset.recordset.length > 0) {
-                            client.emit("validUser", recordset.recordset);
-                        } else {
-                            client.emit("loginFailed");
-                            console.log("login failed");
-                        }
-
-                        // socket.emit('updateActiveusers', { activeUsers: activeUsers });
-                    }
-
-                    sql.close();
-
-                });
-            }
+    client.on("doLogin", function (data) {
+        makeSureDatabaseAndTablesExists().then(() => {
+            const query = `select * from users_info where email='${data.username}' OR username='${data.userName}' AND pass='${data.password}'`;
+            executeQuery(query).then((record) => {
+                if (record.length > 0) {
+                    client.emit("validUser", record);
+                } else {
+                    client.emit("loginFailed");
+                    console.log("login failed");
+                }
+            })
         });
+       
     });
 
-    client.on("signin", function (data) {
+    client.on("signIn", function (data) {
         console.log(data);
-        sql.connect(config, function (err) {
-            if (err) console.log(err);
-            else {
-                console.log("connected to mssql.");
-                // create Request object
-                const request = new sql.Request();
-                const id = uuid();
-                console.log(id);
-                // query to the database and get the records
-                const query = `insert into users_info values('${id}', '${data.email}', '${data.userName}', '${data.fullName}', ${data.mobileNumber}, '${data.password}')`
-                request.query(query, function (err, recordSet) {
-                    if (!err) {
-                        client.emit("signedUpSuccessfully");
-                        console.log("sing up successfully")
-                    }
-                    else {
-                        //need to handle this on client side.
-                        client.emit("signUpFailed");
-                        console.log(err);
-                    }
-                    sql.close();
-                });
-            }
-
-
-        })
+        makeSureDatabaseAndTablesExists().then(() => {
+            const id = uuid();
+            const query = `insert into users_info values('${id}', '${data.email}', '${data.userName}', '${data.fullName}', ${data.mobileNumber}, '${data.password}')`
+            executeQuery(query).then((recordSet) => {
+                client.emit("signedUpSuccessfully");
+                console.log("sing up successfully");
+                //need to handle this on client side.
+                //client.emit("signUpFailed");
+                //console.log(err);               
+            })
+        });      
 
     });
 
@@ -180,7 +155,7 @@ io.on('connection', (client) => {
     client.on("editDistribution", (data) => {
         getDistributionWithId(data.id).then((distribution) => {
             const expenseArea = distribution[0].expense_area;
-            const queryForExpenseDistribution = `update expense_distribution set expense_area='${data.expenseArea}' ,allocated_expense_amonut=${data.allocatedAmount} 
+            const queryForExpenseDistribution = `update expense_distribution set expense_area='${data.expenseArea}' ,allocated_expense_amount=${data.allocatedAmount} 
         where id='${data.id}'`;
             const queryForExpenseManager = `update expense_manager set expense_area='${data.expenseArea}' ,allocated_expense_amount=${data.allocatedAmount} 
         where expense_area='${expenseArea}' and month_name='${currentMonth()}' and year=${currentYear()}`;
@@ -295,9 +270,9 @@ const getDistributionWithId = (id) => {
     return executeQuery(selectQuery);
 }
 
-const connectSql = () => {
+const connectSql = (conf) => {
     const sqlDef = new Deferred();
-    sql.connect(config, function (err) {
+    sql.connect(conf || config, function (err) {
         if (err) {
             console.log(err);
             sqlDef.reject();
@@ -312,20 +287,73 @@ const connectSql = () => {
     return sqlDef;
 }
 
-const executeQuery = (query) => {
+const executeQuery = (query, conf) => {
     const def = new Deferred();
     //close any existing connection.
     sql.close();
-    connectSql().then((request) => {
+    connectSql(conf).then((request) => {
+        console.log("Executing script");
         request.query(query, function (err, recordSet) {
             sql.close();
-            if (err) console.log(err);
+            if (err) {
+                console.log(err);
+                def.reject(err);
+            }
             else {
                 def.resolve(recordSet.recordset)
             }
         });
     });
     return def;
+}
+
+const makeSureDatabaseAndTablesExists = () => {
+    const query = `DECLARE @createDatabaseQuery NVARCHAR(MAX)=N'IF  NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = ''Expense Manager'')
+    BEGIN
+        CREATE DATABASE [Expense Manager]		
+    END;'
+	EXEC Sp_executesql @createDatabaseQuery
+
+    DECLARE @createTablesQuery NVARCHAR(MAX)=N'USE [Expense Manager];
+    IF  NOT EXISTS (SELECT * FROM sys.objects 
+    WHERE object_id = OBJECT_ID(''[dbo].[expense_distribution]'') AND type in (''U''))
+    BEGIN
+        CREATE TABLE [dbo].[expense_distribution](
+	        [id] [nvarchar](255) NULL,
+	        [user_id] [nvarchar](255) NULL,
+	        [expense_area] [nvarchar](255) NULL,
+	        [allocated_expense_amount] [int] NULL
+        )
+    END
+    IF  NOT EXISTS (SELECT * FROM sys.objects 
+    WHERE object_id = OBJECT_ID(''[dbo].[users_info]'') AND type in (''U''))
+    BEGIN
+        CREATE TABLE [dbo].[users_info](
+	        [id] [nvarchar](255) NULL,
+	        [email] [nvarchar](255) NULL,
+	        [username] [nvarchar](255) NULL,
+	        [full_name] [nvarchar](255) NULL,
+	        [mobile_number] [nvarchar](255) NULL,
+	        [pass] [nvarchar](255) NULL
+        )
+    END
+    IF  NOT EXISTS (SELECT * FROM sys.objects 
+    WHERE object_id = OBJECT_ID(''[dbo].[expense_manager]'') AND type in (''U''))
+    BEGIN
+        CREATE TABLE [dbo].[expense_manager](
+	        [id] [nvarchar](255) NULL,
+	        [expense_area] [nvarchar](255) NULL,
+	        [allocated_expense_amount] [decimal](38, 2) NULL,
+	        [total_expense_amount] [decimal](38, 2) NULL,
+	        [user_id] [nvarchar](255) NULL,
+	        [month_name] [varchar](255) NULL,
+	        [year] [int] NULL
+        )
+    END
+    '
+    EXEC Sp_executesql @createTablesQuery
+    `
+    return executeQuery(query, configForDynamicQuery);
 }
 
 const currentMonth = () => {
