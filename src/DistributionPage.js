@@ -202,7 +202,7 @@ class Distribution extends Component {
         return (
             <div id="distributionContainer" className="distribution-container" >
                 <MuiThemeProvider>
-                    <Paper style={style} zDepth={4} rounded={false}>
+                    <Paper style={style} zDepth={1} rounded={false}>
                         <div id="distributionTable" className="distribution-table">
 
                         </div>

@@ -36,14 +36,17 @@ class Toolbar extends Component {
 
         socket.on("expenseAdded", () => {
             this.setState({ showNotification: true, notificationMessage: "Expense Added Successfully." });
-        })
-        this.openFolderBar = () => {
-            /*const folderBar = document.getElementById('folderBarContainer');
-            if (folderBar.offsetHeight > 0 && folderBar.offsetHeight > 0) {
-                folderBar.style.display = "none";
-            } else {
-                folderBar.style.display = "block";
-            }*/
+        });
+
+        socket.on("passwordChangedSuccessfully",()=>{
+            this.setState({ showNotification: true, notificationMessage: "Password Changed Successfully." });
+            this.closeDialog();
+        });
+
+        socket.on("incorrectOldPassword",()=>{
+            this.setState({ oldPassword: "Incorrect old password." });
+        });
+        this.openFolderBar = () => {           
             this.setState({ isCollapsed: !this.state.isCollapsed })
         };
 
@@ -58,7 +61,8 @@ class Toolbar extends Component {
             expenseAreas: [],
             selectedExpense: 1,
             notificationMessage: "",
-            showNotification: false
+            showNotification: false,
+            showChangePasswordDialog: false
         };
 
         this.renderHistoryPage = () => {
@@ -99,7 +103,7 @@ class Toolbar extends Component {
         }
 
         this.closeDialog = () => {
-            this.setState({ showAddExpenseDialog: false, selectedExpense: 1, amountErrorText: "" });
+            this.setState({ showAddExpenseDialog: false, oldPassword: "", newPassword: '', selectedExpense: 1, amountErrorText: "", showChangePasswordDialog: false });
         }
 
         this.onAmountChange = () => {
@@ -134,6 +138,33 @@ class Toolbar extends Component {
             this.getExpenseAreas().then((areas) => {
                 this.setState({ showAddExpenseDialog: true, expenseAreas: areas });
             });
+        }
+
+        this.showChangePasswordDialog = () => {
+            this.setState({ showChangePasswordDialog: true });
+        }
+
+        this.changePassword = () => {
+            this.setState({ oldPassword: "", newPassword: '' });;
+            const oldPassword = document.getElementById("oldPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+            const confirmNewPassword = document.getElementById("confirmOldPassword").value;
+            let isValid = true;
+            if (!oldPassword) {
+                this.setState({ oldPassword: "Old password must be specified." });
+                isValid = false;
+            }
+
+            if (!newPassword || !confirmNewPassword) {
+                this.setState({ newPassword: "New password must be specified." });
+                isValid = false;
+            } else if (newPassword != confirmNewPassword) {
+                this.setState({ newPassword: "New passwords are not same." });
+                isValid = false;
+            }
+            if (!isValid) return;
+            socket.emit("changePassword",{oldPassword:oldPassword,newPassword:newPassword,userId:userId});           
+
         }
 
         this.selectExpense = (event, index, value) => {
@@ -195,7 +226,7 @@ class Toolbar extends Component {
                             anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
                         >
                             <MenuItem primaryText="Add Expense" onClick={this.showAddExpenseDialog} />
-                            <MenuItem primaryText="Change Password" />
+                            <MenuItem primaryText="Change Password" onClick={this.showChangePasswordDialog} />
                             <MenuItem primaryText="Sign out" onClick={this.logout} />
                         </IconMenu>}
                     />
@@ -235,8 +266,37 @@ class Toolbar extends Component {
                             autoHideDuration={3000}
                             onRequestClose={this.handleNotificationClose}
                             bodyStyle={notificationStyle}
-                        //anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                         />
+                    </MuiThemeProvider>
+                    <MuiThemeProvider>
+                        <Dialog
+                            title="Change Password"
+                            actions={[
+                                <FlatButton
+                                    label="Cancel"
+                                    primary={true}
+                                    onClick={this.closeDialog}
+                                />,
+                                <FlatButton
+                                    label="Change password"
+                                    primary={true}
+                                    onClick={this.changePassword}
+                                />,
+                            ]}
+                            modal={true}
+                            open={this.state.showChangePasswordDialog}
+                            contentStyle={customContentStyle}>
+
+                            <TextField id="oldPassword" type="password" errorStyle={{ fontFamily: 'verdana' }}
+                                floatingLabelText="Old Password" hintText="Old Password" errorText={this.state.oldPassword} />
+                            <br />
+                            <TextField id="newPassword" type="password" errorStyle={{ fontFamily: 'verdana' }}
+                                floatingLabelText="New Password" hintText="New Password" />
+                            <br />
+                            <TextField id="confirmOldPassword" type="password" errorStyle={{ fontFamily: 'verdana' }}
+                                floatingLabelText="Confirm New Password" hintText="Confirm New Password" errorText={this.state.newPassword} />
+
+                        </Dialog>
                     </MuiThemeProvider>
                     <div id="pageContent" className="page-content">
                         <OverView />

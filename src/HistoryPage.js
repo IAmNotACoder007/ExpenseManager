@@ -139,7 +139,7 @@ class History extends Component {
         return (
             <div className="history-page-container">
                 <MuiThemeProvider>
-                    <Paper style={style} zDepth={4} rounded={false}>
+                    <Paper style={style} zDepth={1} rounded={false}>
                         <DropDownMenu value={this.state.selectedMonth} menuStyle={menuStyle} labelStyle={menuStyle} style={ddstyles.customWidth} autoWidth={false} onChange={this.handleMonthChange}>
                             {this.getMonthsMenu()}
                         </DropDownMenu>

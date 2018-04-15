@@ -100,7 +100,7 @@ io.on('connection', (client) => {
                 }
             })
         });
-       
+
     });
 
     client.on("signIn", function (data) {
@@ -115,9 +115,29 @@ io.on('connection', (client) => {
                 //client.emit("signUpFailed");
                 //console.log(err);               
             })
-        });      
+        });
 
     });
+
+    client.on("changePassword", (data) => {
+        const userId = data.userId;
+        if (!userId) {
+            console.error("userId is not found.");
+            res.send(null);
+        } else {
+            const passwordQuery = `select pass from users_info where id='${userId}'`;
+            executeQuery(passwordQuery).then((password) => {
+                console.log(password);
+                if (password[0].pass != data.oldPassword) client.emit("incorrectOldPassword");
+                else {
+                    const updateQuery = `update users_info set pass='${data.newPassword}' where id='${userId}'`;
+                    executeQuery(updateQuery).then(() => {
+                        client.emit("passwordChangedSuccessfully");
+                    })
+                }
+            });
+        }
+    })
 
     client.on('sendOtp', (emailAddress) => {
         const transporter = nodemailer.createTransport({
@@ -291,8 +311,7 @@ const executeQuery = (query, conf) => {
     const def = new Deferred();
     //close any existing connection.
     sql.close();
-    connectSql(conf).then((request) => {
-        console.log("Executing script");
+    connectSql(conf).then((request) => {       
         request.query(query, function (err, recordSet) {
             sql.close();
             if (err) {
