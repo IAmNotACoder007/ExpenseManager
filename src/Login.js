@@ -20,7 +20,7 @@ import cookie from 'react-cookies'
 class Login extends Component {
     constructor(prop) {
         super(prop);
-        const socket = prop.socket;        
+        const socket = prop.socket;
         const progressBar = <MuiThemeProvider> <CircularProgress size={80} thickness={5} /></MuiThemeProvider>;
         this.state = {
             userNameErrorText: '',
@@ -36,6 +36,7 @@ class Login extends Component {
             showConfirmationDialog: false,
             otpEmailAddress: '',
             confirmationMsg: "Congratulations!! you have been registered successfully.",
+            loginBoxStyle: '350px'
         }
 
 
@@ -60,12 +61,14 @@ class Login extends Component {
                 socket.emit('doLogin', { userName: userName, password: password });
                 socket.on('validUser', (data) => {
                     this.setCookie("userId", data[0].id);
-                    ReactDOM.render(<Toolbar socket={socket} userId={data[0].id}/>, document.getElementById('main-page-container'));
+                    ReactDOM.render(<Toolbar socket={socket} userId={data[0].id} />, document.getElementById('main-page-container'));
                 });
 
                 socket.on('loginFailed', () => {
                     this.setState({ passwordErrorText: 'username or password is not correct.' });
                 })
+            } else {
+                this.setState({ loginBoxStyle: '375px' });
             }
         }
 
@@ -124,17 +127,17 @@ class Login extends Component {
                 this.setState({ otpEmailAddress: 'Email Address must be specified.' })
             } else {
                 this.setState({ showSpinner: true, disabledButton: true });
-                 socket.emit('sendOtp', emailAddress);
- 
-                 socket.on("emailSendSuccessfully",()=>{
-                     this.closeDialog();
-                     this.setState({ showConfirmationDialog: true,confirmationMsg:`Your one time password is send on '${emailAddress}'` });                    
-                 })
-                
-                 socket.on("emailSendingFailed",()=>{
-                     this.closeDialog();
-                     this.setState({ showConfirmationDialog: true,confirmationMsg:`Enable to send email on '${emailAddress}', please verify your email or try again later.` });                    
-                 });
+                socket.emit('sendOtp', emailAddress);
+
+                socket.on("emailSendSuccessfully", () => {
+                    this.closeDialog();
+                    this.setState({ showConfirmationDialog: true, confirmationMsg: `Your one time password is send on '${emailAddress}'` });
+                })
+
+                socket.on("emailSendingFailed", () => {
+                    this.closeDialog();
+                    this.setState({ showConfirmationDialog: true, confirmationMsg: `Enable to send email on '${emailAddress}', please verify your email or try again later.` });
+                });
             }
         }
     }
@@ -142,12 +145,12 @@ class Login extends Component {
     render() {
         const onUserNameChange = (event, newValue) => {
             if (newValue) {
-                this.setState({ userNameErrorText: '' })
+                this.setState({ userNameErrorText: '', loginBoxStyle: '350px' })
             }
         }
         const onPasswordChange = (event, newValue) => {
             if (newValue) {
-                this.setState({ passwordErrorText: '' })
+                this.setState({ passwordErrorText: '', loginBoxStyle: '350px' })
             }
         };
 
@@ -174,8 +177,8 @@ class Login extends Component {
             else if (newValue) this.setState({ signInMobileErrorText: '' });
         }
         const style = {
-            height: '55%',
-            width: '30%',
+            height: this.state.loginBoxStyle,
+            width: '405px',
             margin: 20,
             textAlign: 'left',
             display: 'inline-block',

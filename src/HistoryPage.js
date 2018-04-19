@@ -119,11 +119,12 @@ class History extends Component {
 
     render() {
         const style = {
-            height: '60%',
+            height: '70%',
             width: '45%',
             margin: 20,
             textAlign: 'left',
             display: 'inline-block',
+            position: 'relative'
         };
 
         const ddstyles = {
@@ -146,7 +147,7 @@ class History extends Component {
                         <DropDownMenu value={this.state.selectedYear} style={ddstyles.customWidth} autoWidth={false} onChange={this.handleYearChange}>
                             {this.getYearsMenu()}
                         </DropDownMenu>
-                        <div id="historyDistributionTable" className="history-distribution-table"></div>
+                        <div id="historyDistributionTable" className="history-distribution-table custom-scrollBar"></div>
                         <div className="total-expense-amount">Total Expense: {this.state.totalExpense}</div>
                         <div id="noExpenseFound" className="no-expense-found" style={{ display: 'none' }}> No expense found for selected month and year</div>
                     </Paper>

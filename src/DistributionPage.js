@@ -95,10 +95,13 @@ class Distribution extends Component {
         this.editDistribution = (expenseArea, totalExpense, id) => {
             this.setState({
                 numberOfRows: 1, isMultiLine: false, showAddDistributionDialog: true, dialogTitle: "Edit Distribution", distributionName: expenseArea, totalExpense: totalExpense, buttonName: "Save", buttonClick: () => {
-                    const distributions = document.getElementById('distributionName').value;
-                    const amounts = document.getElementById('amountValue').value;
-                    socket.emit("editDistribution", { id: id, expenseArea: distributions, allocatedAmount: amounts, userId: this.userId });
-                    this.closeDialog();
+                    const isValid = this.validate();
+                    if (isValid) {
+                        const distributions = document.getElementById('distributionName').value;
+                        const amounts = document.getElementById('amountValue').value;
+                        socket.emit("editDistribution", { id: id, expenseArea: distributions, allocatedAmount: amounts, userId: this.userId });
+                        this.closeDialog();
+                    }
                 }
             });
         }
@@ -113,8 +116,8 @@ class Distribution extends Component {
         this.addDistribution = () => {
             const isValid = this.validate();
             if (isValid) {
-                const distributions = document.getElementById('distributionName').value.split("\n");
-                const amounts = document.getElementById('amountValue').value.split("\n");
+                const distributions = document.getElementById('distributionName').value.trim().split("\n");
+                const amounts = document.getElementById('amountValue').value.trim().split("\n");
                 socket.emit("addDistribution", {
                     distributions: distributions,
                     amounts: amounts,
@@ -145,8 +148,8 @@ class Distribution extends Component {
             else {
                 const distributions = distributionNameText.split("\n");
                 const duplicateDistributions = distributions.filter((value) => {
-                    const expense= Enumerable.from(this.expenses).where(x=>x.expenseArea==value).firstOrDefault(null);
-                    if (expense!=null) return expense.expenseArea;
+                    const expense = Enumerable.from(this.expenses).where(x => x.expenseArea == value).firstOrDefault(null);
+                    if (expense != null) return expense.expenseArea;
                 });
                 if (duplicateDistributions.length) {
                     this.setState({ nameErrorText: `${duplicateDistributions.join(',')} already exits.` });
@@ -181,11 +184,12 @@ class Distribution extends Component {
         };
 
         const style = {
-            height: '60%',
-            width: '40%',
+            height: '70%',
+            width: '50%',
             margin: 20,
             textAlign: 'left',
             display: 'inline-block',
+            position: 'relative'
         };
 
         const onDistributionNameChange = (event, newValue) => {
@@ -203,7 +207,7 @@ class Distribution extends Component {
             <div id="distributionContainer" className="distribution-container" >
                 <MuiThemeProvider>
                     <Paper style={style} zDepth={1} rounded={false}>
-                        <div id="distributionTable" className="distribution-table">
+                        <div id="distributionTable" className="distribution-table custom-scrollBar">
 
                         </div>
 

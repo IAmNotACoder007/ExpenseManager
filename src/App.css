@@ -32,6 +32,20 @@
   flex-direction: column;
 }
 
+.custom-scrollBar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.custom-scrollBar::-webkit-scrollbar-thumb {
+  background: #BDBDBD;
+  border-radius: 20px;
+}
+
+.custom-scrollBar::-webkit-scrollbar-track {
+  background: #ddd;
+  border-radius: 20px;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

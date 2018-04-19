@@ -8,9 +8,14 @@
 
 .history-distribution-table {
     display: grid;
-    grid-template-columns: auto auto 65px;
-    margin: 20px;
+    grid-template-columns: auto auto 70px;
+    padding: 15px;
     font-size: 15px;
+    max-height: calc(100% - 100px);
+    overflow: auto;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 5px;
 }
 
 .history-distribution-table .expense-area {
@@ -31,9 +36,12 @@
     font-size: 15px;
     display: flex;
     justify-content: flex-end;
-    padding: 20px;
+    padding: 10px;
     color: rgb(255, 64, 129);
     text-transform: uppercase;
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
 
 .no-expense-found {

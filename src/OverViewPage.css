@@ -25,6 +25,10 @@
     font-size: 20px;
 }
 
+.limit-exceeded.total-Expense-left{
+    color: red;
+}
+
 .separator{
     border:1px solid rgb(211,211,211);
     height: 80%;

@@ -17,7 +17,8 @@ class OverView extends Component {
         }
         this.state = {
             totalExpense: 0,
-            totalAllocatedExpense: 0
+            totalAllocatedExpense: 0,
+            limitExceededClass: ''
         }
 
         socket.on("expenseAdded", (data) => {
@@ -35,9 +36,12 @@ class OverView extends Component {
             });
             const totalExpense = Enumerable.from(expenses).where(x => x.total_expense_amount != null).select(x => x.total_expense_amount).sum();
             const totalAllocatedExpense = Enumerable.from(expenses).select(x => x.allocated_expense_amount).sum();
+            let limitExceededClass = '';
+            if (totalAllocatedExpense - totalExpense < 0) { limitExceededClass = 'limit-exceeded' };
             this.setState({
                 totalExpense: totalExpense,
-                totalAllocatedExpense: totalAllocatedExpense
+                totalAllocatedExpense: totalAllocatedExpense,
+                limitExceededClass: limitExceededClass
             });
             this.populateExpenseChart();
         }
@@ -65,16 +69,26 @@ class OverView extends Component {
 
             };
         };
+
+        this.getLimitMsg = () => {
+            const limitLeft = this.state.totalAllocatedExpense - this.state.totalExpense;
+            if (limitLeft >= 0) {
+                return `${limitLeft} Rs left until you reach your monthly limit.`;
+            } else {
+                return `you have exceeded your monthly limit by ${limitLeft - (limitLeft * 2)} Rs.`;
+            }
+        }
     }
 
     render() {
+        const limitLeftClass=`total-Expense-left ${this.state.limitExceededClass}`;
         return (
             <div className="overview-container">
                 <div className="summary">
                     <div className="current-Month">{this.currentMonth()}</div><br />
                     <span className="overall">OVERALL</span><br />
                     <span className="total-Expense">{this.state.totalExpense} Rs</span><br />
-                    <span className="total-Expense-left">{this.state.totalAllocatedExpense - this.state.totalExpense} Rs left until you reach your monthly limit.</span>
+                    <span className={limitLeftClass}>{this.getLimitMsg()}</span>
                 </div>
 
                 <div className="separator"></div>
