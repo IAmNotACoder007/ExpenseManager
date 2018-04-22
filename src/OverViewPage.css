@@ -165,3 +165,7 @@
     font-family: verdana;
     position: relative;
 }
+
+.summary-chart .no-expense-found{
+    height: 200px;
+}

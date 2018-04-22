@@ -18,9 +18,12 @@ class OverView extends Component {
         this.state = {
             totalExpense: 0,
             totalAllocatedExpense: 0,
-            limitExceededClass: ''
+            limitExceededClass: '',
+            noExpensesFound: "none",
+            expensesDisplay: "flex"
         }
 
+        socket.off("expenseAdded");
         socket.on("expenseAdded", (data) => {
             this.refreshOverview(JSON.parse(data));
         })
@@ -51,6 +54,7 @@ class OverView extends Component {
 
         this.populateExpenseChart = () => {
             if (this.expenses.length) {
+                this.setState({ noExpensesFound: 'none', expensesDisplay: 'flex' });
                 this.expenses = this.expenses.sort((a, b) => { return b.budget - a.budget });
                 let expenses = [...this.expenses];
                 expenses = expenses.sort((a, b) => { return b.totalExpense - a.totalExpense });
@@ -60,14 +64,14 @@ class OverView extends Component {
                 const container = document.getElementById("chartContainer");
                 const expenseAreasContainer = document.getElementById("expenseAreasContainer");
                 const scaleContainer = document.getElementById("scaleContainer");
+                expenseAreasContainer.innerHTML = '';
+                scaleContainer.innerHTML = '';
                 for (let i = 0; i < this.expenses.length; i++) {
                     const element = this.expenses[i];
                     const totalAvailableWidth = container.offsetWidth;
-                    let budgetHeight = `${maxHeight}px`;
-                    // if (i > 0) {
+                    let budgetHeight = `${maxHeight}px`;                   
                     budgetHeight = `${((maxHeight / maxRange) * element.budget).toFixed(2)}px`;
-                    //height = `${((newHeight * 100) / totalAvailableWidth).toFixed(2)}%`;
-                    //}
+                   
 
                     let expenseHeight = `${((maxHeight / maxRange) * element.totalExpense).toFixed(2)}px`;
                     container.innerHTML += `<div class="expense">                       
@@ -100,8 +104,9 @@ class OverView extends Component {
 
                     scaleContainer.innerHTML += `<span style="bottom: ${scaleBottom - 5}px;">${currentRange}</span>`;
                 }
-
-            };
+            } else {
+                this.setState({ noExpensesFound: 'flex', expensesDisplay: 'none' });
+            }
         };
 
         this.getLimitMsg = () => {
@@ -129,18 +134,19 @@ class OverView extends Component {
 
                 <div className="summary-chart">
                     <div className="summary-chart-title">EXPENSES</div>
-                    <div className="chart-Element">
+                    <div className="chart-Element" style={{ display: this.state.expensesDisplay }}>
                         <div id="scaleContainer" className="scale-container"></div>
                         <div id="chartContainer" className="chart-container custom-scrollBar">
                         </div>
                     </div>
-                    <div id="expenseAreasContainer" className="expense-Areas-Container"></div>
-                    <div className="chart-instruction">
+                    <div id="expenseAreasContainer" className="expense-Areas-Container" style={{ display: this.state.expensesDisplay }}></div>
+                    <div className="chart-instruction" style={{ display: this.state.expensesDisplay }}>
                         <div className="budget-instruction"></div>
                         <div style={{ paddingRight: "15px" }}>Budget</div>
                         <div className="expense-instruction"></div>
                         <div>Expense</div>
                     </div>
+                    <div id="noExpenseFound" class="no-expense-found" style={{ display: this.state.noExpensesFound }}> No expenses found</div>
                 </div>
             </div>
         )

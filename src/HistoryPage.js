@@ -149,7 +149,7 @@ class History extends Component {
                         </DropDownMenu>
                         <div id="historyDistributionTable" className="history-distribution-table custom-scrollBar"></div>
                         <div className="total-expense-amount">Total Expense: {this.state.totalExpense}</div>
-                        <div id="noExpenseFound" className="no-expense-found" style={{ display: 'none' }}> No expense found for selected month and year</div>
+                        <div id="noExpenseFound" className="no-expense-found" style={{ display: 'none' }}> No expenses found</div>
                     </Paper>
                 </MuiThemeProvider>
 
