@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "express": "^4.16.3",
+    "generate-password": "^1.4.0",
     "gmail-send": "^1.2.13",
     "guid": "0.0.12",
     "http": "0.0.0",

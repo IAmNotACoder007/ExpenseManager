@@ -9,3 +9,17 @@
     height: 100%;
     width: 100%;
 }
+
+.app-bar-right-element{
+    width: 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 20px;
+    text-transform: capitalize;
+}
+
+.app-bar-right-element svg{
+    color: white !important;
+}

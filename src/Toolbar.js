@@ -23,7 +23,7 @@ import TextField from 'material-ui/TextField';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import Enumerable from '../node_modules/linq';
 import Message from 'material-ui/svg-icons/communication/message';
-import { deepOrange500, transparent } from 'material-ui/styles/colors';
+import { deepOrange500, transparent, white } from 'material-ui/styles/colors';
 import Snackbar from 'material-ui/Snackbar';
 
 
@@ -33,20 +33,21 @@ class Toolbar extends Component {
         super(prop);
         const socket = prop.socket;
         const userId = prop.userId;
+        this.fullName = prop.fullName;
 
         socket.on("expenseAdded", () => {
             this.setState({ showNotification: true, notificationMessage: "Expense Added Successfully." });
         });
 
-        socket.on("passwordChangedSuccessfully",()=>{
+        socket.on("passwordChangedSuccessfully", () => {
             this.setState({ showNotification: true, notificationMessage: "Password Changed Successfully." });
             this.closeDialog();
         });
 
-        socket.on("incorrectOldPassword",()=>{
+        socket.on("incorrectOldPassword", () => {
             this.setState({ oldPassword: "Incorrect old password." });
         });
-        this.openFolderBar = () => {           
+        this.openFolderBar = () => {
             this.setState({ isCollapsed: !this.state.isCollapsed })
         };
 
@@ -163,7 +164,7 @@ class Toolbar extends Component {
                 isValid = false;
             }
             if (!isValid) return;
-            socket.emit("changePassword",{oldPassword:oldPassword,newPassword:newPassword,userId:userId});           
+            socket.emit("changePassword", { oldPassword: oldPassword, newPassword: newPassword, userId: userId });
 
         }
 
@@ -218,9 +219,9 @@ class Toolbar extends Component {
                         title="Expense Manager"
                         iconClassNameRight="muidocs-icon-navigation-expand-more"
                         onLeftIconButtonClick={this.openFolderBar}
-                        iconElementRight={<IconMenu
+                        iconElementRight={<div className="app-bar-right-element">{this.fullName}<IconMenu
                             iconButtonElement={
-                                <IconButton><MoreVertIcon /></IconButton>
+                                <IconButton><MoreVertIcon style={{ color: white }} /></IconButton>
                             }
                             targetOrigin={{ horizontal: 'right', vertical: 'top' }}
                             anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
@@ -228,7 +229,7 @@ class Toolbar extends Component {
                             <MenuItem primaryText="Add Expense" onClick={this.showAddExpenseDialog} />
                             <MenuItem primaryText="Change Password" onClick={this.showChangePasswordDialog} />
                             <MenuItem primaryText="Sign out" onClick={this.logout} />
-                        </IconMenu>}
+                        </IconMenu></div>}
                     />
                 </MuiThemeProvider>
                 <div className="page-container">

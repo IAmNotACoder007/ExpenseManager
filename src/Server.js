@@ -6,7 +6,8 @@ const sql = require('mssql');
 const uuid = require('uuid/v1');
 const nodemailer = require('nodemailer');
 const Deferred = require('node-defer');
-const Enumerable = require('../node_modules/linq')
+const Enumerable = require('../node_modules/linq');
+const passwordGenerator = require('generate-password');
 
 const config = {
     user: 'sa',
@@ -140,36 +141,52 @@ io.on('connection', (client) => {
     })
 
     client.on('sendOtp', (emailAddress) => {
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
+        let isRegisteredEmail = false;
+        const selectQuery = `select * from users_info where email='${emailAddress}'`;
+        executeQuery(selectQuery).then((record) => {
+            if (record.length > 0) {
+                const password = passwordGenerator.generate({
+                    length: 6,
+                    numbers: true
+                });
+                const transporter = nodemailer.createTransport({
+                    service: 'Gmail',
 
-            auth: {
-                user: 'expense.manager94@gmail.com',
-                pass: 'expense@007'
-            },
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
+                    auth: {
+                        user: 'expense.manager94@gmail.com',
+                        pass: 'expense@007'
+                    },
+                    tls: {
+                        rejectUnauthorized: false
+                    }
+                });
 
 
-        const mailOptions = {
-            from: 'expense.manager94@gmail.com',
-            to: `${emailAddress}`,
-            subject: 'Sending Email using Node.js',
-            text: 'That was easy!'
-        };
+                const mailOptions = {
+                    from: 'expense.manager94@gmail.com',
+                    to: `${emailAddress}`,
+                    subject: 'password',
+                    text: `Your password is ${password}`
+                };
 
-        transporter.sendMail(mailOptions, function (error, info) {
-            /**Need to generate otp send it and update database for it. */
-            if (error) {
-                client.emit('emailSendingFailed');
-                console.log(error);
+                transporter.sendMail(mailOptions, function (error, info) {
+                    /**Need to generate otp send it and update database for it. */
+                    if (error) {
+                        client.emit('emailSendingFailed');
+                        console.log(error);
+                    } else {
+                        const updateQuery = `update users_info set pass='${password}' where email='${emailAddress}'`;
+                        executeQuery(updateQuery).then(() => {
+                            client.emit('emailSendSuccessfully');
+                            console.log('Email sent: ' + info.response);
+                        });
+                    }
+                });
             } else {
-                client.emit('emailSendSuccessfully');
-                console.log('Email sent: ' + info.response);
+                client.emit('emailNotRegistered');
             }
-        });
+        })
+
     });
 
     client.on("editDistribution", (data) => {
@@ -311,7 +328,7 @@ const executeQuery = (query, conf) => {
     const def = new Deferred();
     //close any existing connection.
     sql.close();
-    connectSql(conf).then((request) => {       
+    connectSql(conf).then((request) => {
         request.query(query, function (err, recordSet) {
             sql.close();
             if (err) {

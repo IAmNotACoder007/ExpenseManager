@@ -36,22 +36,25 @@ class Distribution extends Component {
             buttonName: "Save",
             isMultiLine: false,
             numberOfRows: 2,
-            buttonClick: () => { this.addDistribution() }
+            buttonClick: () => { this.addDistribution() },
+            noDistributionFound: 'none'
         };
 
         this.expenses = [];
-        const deleteIcon = <MuiThemeProvider><DeleteIcon className="delete-icon" /></MuiThemeProvider>;
+        const deleteIcon = <MuiThemeProvider><DeleteIcon tooltip="Delete" className="delete-icon" /></MuiThemeProvider>;
         const editIcon = <MuiThemeProvider><EditIcon /></MuiThemeProvider>;
 
         this.populateDistributionTable = () => {
             const totalExpense = Enumerable.from(this.expenses).select(x => x.totalExpense).sum();
             const distributionContainer = document.getElementById('distributionTable');
-            this.expenses.forEach((element, index) => {
-                let lastColumnClass = '';
-                if (this.expenses.length == index + 1) {
-                    lastColumnClass = "last-column";
-                }
-                distributionContainer.innerHTML += `               
+            if (this.expenses.length) {
+                this.setState({ noDistributionFound: 'none' });
+                this.expenses.forEach((element, index) => {
+                    let lastColumnClass = '';
+                    if (this.expenses.length == index + 1) {
+                        lastColumnClass = "last-column";
+                    }
+                    distributionContainer.innerHTML += `               
                 <div class='expense-area ${lastColumnClass}'>${element.expenseArea}</div>
                 <div class='total-expense ${lastColumnClass}'>${element.totalExpense}</div>
                 <div class='${lastColumnClass}'>${((element.totalExpense * 100) / totalExpense).toFixed(2)}%</div>  
@@ -64,7 +67,10 @@ class Distribution extends Component {
                 </a>   
                 </div>          
                 `;
-            });
+                });
+            } else {
+                this.setState({ noDistributionFound: 'flex' });
+            }
         }
 
         this.onClick = (event) => {
@@ -211,7 +217,7 @@ class Distribution extends Component {
 
                         </div>
 
-
+                        <div className="no-distribution-found" style={{ display: this.state.noDistributionFound }}>No distribution found</div>
                         <div className="add-new-link">
                             <FlatButton label="Add Distributions" primary={true} onClick={() => {
                                 this.addNewDistribution();

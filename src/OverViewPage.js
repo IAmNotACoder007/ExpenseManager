@@ -32,7 +32,7 @@ class OverView extends Component {
             this.expenses = [];
             expenses.forEach((expense, index) => {
                 if (expense.total_expense_amount != null)
-                    this.expenses.push({ expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount })
+                    this.expenses.push({ expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount, budget: expense.allocated_expense_amount })
             });
             const totalExpense = Enumerable.from(expenses).where(x => x.total_expense_amount != null).select(x => x.total_expense_amount).sum();
             const totalAllocatedExpense = Enumerable.from(expenses).select(x => x.allocated_expense_amount).sum();
@@ -51,20 +51,54 @@ class OverView extends Component {
 
         this.populateExpenseChart = () => {
             if (this.expenses.length) {
-                this.expenses = this.expenses.sort((a, b) => { return b.totalExpense - a.totalExpense });
+                this.expenses = this.expenses.sort((a, b) => { return b.budget - a.budget });
+                let expenses = [...this.expenses];
+                expenses = expenses.sort((a, b) => { return b.totalExpense - a.totalExpense });
+                let maxHeight = 290;
+                let maxRange = this.expenses[0].budget;
+                if (this.expenses[0].budget < expenses[0].totalExpense) maxRange = expenses[0].totalExpense;
+                const container = document.getElementById("chartContainer");
+                const expenseAreasContainer = document.getElementById("expenseAreasContainer");
+                const scaleContainer = document.getElementById("scaleContainer");
                 for (let i = 0; i < this.expenses.length; i++) {
                     const element = this.expenses[i];
-                    const container = $('#chartContainer')[0];
                     const totalAvailableWidth = container.offsetWidth;
-                    let width = '100%';
-                    if (i > 0) {
-                        let newWidth = (totalAvailableWidth / this.expenses[0].totalExpense) * element.totalExpense;
-                        width = `${((newWidth * 100) / totalAvailableWidth).toFixed(2)}%`;
-                    }
-                    container.innerHTML += `<div class="expense">
-                        <span class="expenseArea" style='color:${this.colors[i]}'>${element.expenseArea}  ${element.totalExpense}Rs</span><br />
-                        <div style='height: 15px;background-color:${this.colors[i]};width:${width}'></div>
+                    let budgetHeight = `${maxHeight}px`;
+                    // if (i > 0) {
+                    budgetHeight = `${((maxHeight / maxRange) * element.budget).toFixed(2)}px`;
+                    //height = `${((newHeight * 100) / totalAvailableWidth).toFixed(2)}%`;
+                    //}
+
+                    let expenseHeight = `${((maxHeight / maxRange) * element.totalExpense).toFixed(2)}px`;
+                    container.innerHTML += `<div class="expense">                       
+                        <div class='bar-chat-item budget-bar' title=${element.budget} style='height:${budgetHeight}'></div>
+                        <div class='bar-chat-item expense-bar' title=${element.totalExpense} style='height:${expenseHeight}'></div>
+                        
                     </div>`;
+
+                    expenseAreasContainer.innerHTML += `<div class='expense-area'><span>${element.expenseArea}</span></div>`;
+                }
+                let range = maxRange / 6;
+                const reminder = range % 10;
+                range = range + (10 - reminder);
+                let currentRange = 0;
+                let bottom = 0;
+                let scaleBottom = 0;
+                let baseScale = 0;
+                for (let i = 0; i <= 6; i++) {
+                    if (i > 0) {
+                        currentRange += range;
+                        bottom += 300 / 6;
+                        if (!scaleBottom)
+                            scaleBottom = baseScale = bottom - 13;//13px is scale text height
+                        else scaleBottom = baseScale * i;
+                    }
+
+                    container.innerHTML += `<div class='char-range-container' style="bottom: ${bottom}px;">                   
+                    <div class='char-range-line'></div>
+                    </div>`;
+
+                    scaleContainer.innerHTML += `<span style="bottom: ${scaleBottom - 5}px;">${currentRange}</span>`;
                 }
 
             };
@@ -75,13 +109,13 @@ class OverView extends Component {
             if (limitLeft >= 0) {
                 return `${limitLeft} Rs left until you reach your monthly limit.`;
             } else {
-                return `you have exceeded your monthly limit by ${limitLeft - (limitLeft * 2)} Rs.`;
+                return `You have exceeded your monthly limit by ${limitLeft - (limitLeft * 2)} Rs.`;
             }
         }
     }
 
     render() {
-        const limitLeftClass=`total-Expense-left ${this.state.limitExceededClass}`;
+        const limitLeftClass = `total-Expense-left ${this.state.limitExceededClass}`;
         return (
             <div className="overview-container">
                 <div className="summary">
@@ -95,7 +129,17 @@ class OverView extends Component {
 
                 <div className="summary-chart">
                     <div className="summary-chart-title">EXPENSES</div>
-                    <div id="chartContainer" className="chart-container">
+                    <div className="chart-Element">
+                        <div id="scaleContainer" className="scale-container"></div>
+                        <div id="chartContainer" className="chart-container custom-scrollBar">
+                        </div>
+                    </div>
+                    <div id="expenseAreasContainer" className="expense-Areas-Container"></div>
+                    <div className="chart-instruction">
+                        <div className="budget-instruction"></div>
+                        <div style={{ paddingRight: "15px" }}>Budget</div>
+                        <div className="expense-instruction"></div>
+                        <div>Expense</div>
                     </div>
                 </div>
             </div>

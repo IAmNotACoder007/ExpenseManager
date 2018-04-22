@@ -14,7 +14,7 @@ import Dialog from 'material-ui/Dialog';
 import openSocket from 'socket.io-client';
 import CircularProgress from 'material-ui/CircularProgress';
 import ReactDOMServer from 'react-dom/server';
-import cookie from 'react-cookies'
+import cookie from 'react-cookies';
 
 
 class Login extends Component {
@@ -61,7 +61,8 @@ class Login extends Component {
                 socket.emit('doLogin', { userName: userName, password: password });
                 socket.on('validUser', (data) => {
                     this.setCookie("userId", data[0].id);
-                    ReactDOM.render(<Toolbar socket={socket} userId={data[0].id} />, document.getElementById('main-page-container'));
+                    this.setCookie("fullName",data[0].full_name)
+                    ReactDOM.render(<Toolbar socket={socket} userId={data[0].id} fullName={data[0].full_name} />, document.getElementById('main-page-container'));
                 });
 
                 socket.on('loginFailed', () => {
@@ -131,12 +132,16 @@ class Login extends Component {
 
                 socket.on("emailSendSuccessfully", () => {
                     this.closeDialog();
-                    this.setState({ showConfirmationDialog: true, confirmationMsg: `Your one time password is send on '${emailAddress}'` });
+                    this.setState({ showConfirmationDialog: true, confirmationMsg: `Your password has been send on '${emailAddress}'` });
                 })
 
                 socket.on("emailSendingFailed", () => {
                     this.closeDialog();
                     this.setState({ showConfirmationDialog: true, confirmationMsg: `Enable to send email on '${emailAddress}', please verify your email or try again later.` });
+                });
+
+                socket.on("emailNotRegistered", () => {                   
+                    this.setState({otpEmailAddress: `'${emailAddress}' is not registered.`,showSpinner: 'none', disabledButton: false });
                 });
             }
         }
@@ -266,7 +271,7 @@ class Login extends Component {
                     <Paper style={style} zDepth={1} rounded={false}>
                         <AppBar iconClassNameLeft="icon-left"
                             title={<span style={styles.title}>Expense Manager</span>}
-                            iconElementRight={<FlatButton label="Sign In" onClick={() => {
+                            iconElementRight={<FlatButton label="Sign Up" onClick={() => {
                                 this.setState({ showSignInDialog: true });
                             }} />}
                             iconElementLeft={<div style={{ display: 'none' }} />}
@@ -293,7 +298,7 @@ class Login extends Component {
                 <MuiThemeProvider>
 
                     <Dialog
-                        title="Sign In"
+                        title="Sign Up"
                         actions={signInDialogActions}
                         modal={true}
                         autoScrollBodyContent={true}
@@ -334,7 +339,7 @@ class Login extends Component {
                         contentStyle={customContentStyle}>
 
                         <TextField fullWidth={true} id="otp" errorStyle={{ fontFamily: 'verdana' }} onChange={onSignInEmailChange}
-                            floatingLabelText="Email" errorText={this.state.otpEmailAddress} />
+                            floatingLabelText="Enter your registered Email" errorText={this.state.otpEmailAddress} />
                         <CircularProgress style={otpSpinnerStyle} size={30} thickness={3} />
                     </Dialog>
                 </MuiThemeProvider>
