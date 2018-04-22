@@ -236,7 +236,7 @@ class Toolbar extends Component {
                     <MuiThemeProvider>
                         <Drawer docked={false} open={this.state.isCollapsed} onRequestChange={this.handleClose}>
                             <MenuItem disabled={true} style={menuStyle}>Expense Manager</MenuItem>
-                            <MenuItem onClick={this.renderOverviewPage}>Overview</MenuItem>
+                            <MenuItem onClick={this.renderOverviewPage}>Dashboard</MenuItem>
                             <MenuItem onClick={this.renderHistoryPage}>History</MenuItem>
                             <MenuItem onClick={this.renderBudgetPage}>Budget</MenuItem>
                             <MenuItem onClick={this.renderDistributionPage}>Distribution</MenuItem>
