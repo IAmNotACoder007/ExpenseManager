@@ -101,7 +101,7 @@ class Distribution extends Component {
         this.editDistribution = (expenseArea, totalExpense, id) => {
             this.setState({
                 numberOfRows: 1, isMultiLine: false, showAddDistributionDialog: true, dialogTitle: "Edit Distribution", distributionName: expenseArea, totalExpense: totalExpense, buttonName: "Save", buttonClick: () => {
-                    const isValid = this.validate();
+                    const isValid = this.validate(expenseArea);
                     if (isValid) {
                         const distributions = document.getElementById('distributionName').value;
                         const amounts = document.getElementById('amountValue').value;
@@ -122,8 +122,15 @@ class Distribution extends Component {
         this.addDistribution = () => {
             const isValid = this.validate();
             if (isValid) {
-                const distributions = document.getElementById('distributionName').value.trim().split("\n");
-                const amounts = document.getElementById('amountValue').value.trim().split("\n");
+                let distributions = document.getElementById('distributionName').value.trim().split("\n");
+                let amounts = document.getElementById('amountValue').value.trim().split("\n");
+                //need to make sure that distribution and amount must be of same size.
+                const noOfDistributions = distributions.length;
+                const noOfAmounts = amounts.length;
+                if (noOfDistributions != noOfAmounts) {
+                    if (noOfDistributions > noOfAmounts) distributions = distributions.slice(0, noOfAmounts);
+                    else if (noOfDistributions < noOfAmounts) amounts = amounts.slice(0, noOfDistributions);
+                }
                 socket.emit("addDistribution", {
                     distributions: distributions,
                     amounts: amounts,
@@ -144,7 +151,7 @@ class Distribution extends Component {
             distributionTable.onclick = this.onClick.bind(this);
         }
 
-        this.validate = () => {
+        this.validate = (expenseArea) => {
             const distributionNameText = document.getElementById('distributionName').value;
             const amountValue = parseFloat(document.getElementById('amountValue').value);
             let isValid = distributionNameText && amountValue;
@@ -158,8 +165,10 @@ class Distribution extends Component {
                     if (expense != null) return expense.expenseArea;
                 });
                 if (duplicateDistributions.length) {
-                    this.setState({ nameErrorText: `${duplicateDistributions.join(',')} already exits.` });
-                    isValid = false;
+                    if (!expenseArea || expenseArea != duplicateDistributions) {
+                        this.setState({ nameErrorText: `${duplicateDistributions.join(',')} already exits.` });
+                        isValid = false;
+                    }
                 }
             }
             if (!amountValue)

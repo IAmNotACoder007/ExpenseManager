@@ -47,11 +47,12 @@
 .no-expense-found {
     color: rgb(255, 64, 129);
     font-family: roboto;
-    text-transform: uppercase;
+    text-transform: capitalize;
     display: flex;
     align-items: center;
     justify-content: center;
     height: calc(100% - 200px);
+    font-size: 20px;
 }
 
 /*.history-distribution-table div:hover{
