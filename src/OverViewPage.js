@@ -92,7 +92,7 @@ class OverView extends Component {
                 for (let i = 0; i <= 6; i++) {
                     if (i > 0) {
                         currentRange += range;
-                        bottom += 300 / 6;
+                        bottom += Math.round((maxHeight / 6) + (reminder));
                         if (!scaleBottom)
                             scaleBottom = baseScale = bottom - 13;//13px is scale text height
                         else scaleBottom = baseScale * i;

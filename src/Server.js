@@ -50,7 +50,10 @@ app.get('/getHistory', (req, res) => {
         const selectQuery = `select* from expense_manager where user_id='${userId}'`;
         executeQuery(selectQuery).then((record) => {
             const months = Enumerable.from(record).select(x => x.month_name).distinct().toArray();
+            //make sure current month is present in months array.
+            if (months.indexOf(currentMonth()) == -1) months.push(currentMonth());
             const years = Enumerable.from(record).select(x => x.year).distinct().toArray();
+            if (years.indexOf(currentYear()) == -1) years.push(currentYear());
             const expenses = Enumerable.from(record).where(x => x.month_name == currentMonth() && x.year == currentYear() && x.total_expense_amount != null).toArray();
             res.send(JSON.stringify({ months: months, years: years, expenses: expenses }));
         });
