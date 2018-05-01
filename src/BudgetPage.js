@@ -13,6 +13,7 @@ class Budget extends Component {
             noBudgetFound: "none"
         }
         this.expenses = [];
+        this.colors = ["#5179D6", "#66CC66", "#EF2F41", "#FFC700", "#61BDF2", "#FF7900", "#7588DD", "#2F5E8C", "#07BACE", "#BAE55C", "#BA1871", "#FFFFCC", "#BDE6FC", "#C7C7C7", "#ADA8FF", "#2FA675"];
         this.refreshBudget = () => {
             if (this.expenses.length) {
                 this.setState({ noBudgetFound: 'none', budgetDisplay: 'flex' });
@@ -25,12 +26,22 @@ class Budget extends Component {
                     {
                         canvas: chartCanvas,
                         data: myVinyls,
-                        colors: ["#5179D6", "#66CC66", "#EF2F41", "#FFC700", "#61BDF2", "#FF7900", "#7588DD", "#2F5E8C", "#07BACE", "#BAE55C", "#BA1871", "#FFFFCC", "#BDE6FC", "#C7C7C7", "#ADA8FF", "#2FA675"]
+                        colors: this.colors
                     }
                 );
                 chart.draw();
+                this.updateChartInstructions(Object.keys(myVinyls));
             } else {
                 this.setState({ noBudgetFound: 'flex', budgetDisplay: 'none' });
+            }
+        }
+
+        this.updateChartInstructions = (expenseAreas) => {
+            const instructionsContainer = document.getElementById("chartInstructions");
+            instructionsContainer.innerHTML = '';//make it empty.
+            for (let i = 0; i < expenseAreas.length; i++) {
+                instructionsContainer.innerHTML += `<div class="instructions"><div class="chart-color" style="background:${this.colors[i]}"></div>
+                <div class="expense-area">${expenseAreas[i]}</div></div>`
             }
         }
 
@@ -87,7 +98,7 @@ class Budget extends Component {
             ctx.fillStyle = color;
             ctx.shadowColor = 'white';
             ctx.shadowBlur = 1;
-            //ctx.strokeText('Hello world');
+          //  ctx.strokeText('Hello world', 200,160 );  
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);

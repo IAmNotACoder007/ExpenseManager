@@ -35,6 +35,7 @@ app.get('/expenseDistribution', (req, res) => {
         res.send(null);
     } else {
         getDistributionWithUserId(userId).then((record) => {
+            console.log(record);
             res.send(JSON.stringify(record));
         });
 
@@ -284,18 +285,35 @@ io.on('connection', (client) => {
     client.on("addExpense", (data) => {
         const selectQuery = `select* from expense_manager where expense_area='${data.expenseArea}' and month_name='${currentMonth()}' and year=${currentYear()}`;
         executeQuery(selectQuery).then((expense) => {
-            const id = expense[0].id;
-            let totalExpense = expense[0].total_expense_amount;
-            if (totalExpense) totalExpense = parseFloat(totalExpense) + parseFloat(data.amount);
-            else totalExpense = parseFloat(data.amount);
-            const updateQuery = `update expense_manager set total_expense_amount=${totalExpense} where id='${id}'`;
-            executeQuery(updateQuery).then(() => {
-                const query = `select* from expense_manager where user_id='${data.userId}' and month_name='${currentMonth().toLowerCase()}' 
-                and year=${currentYear()}`
-                executeQuery(query).then((record) => {
-                    client.emit("expenseAdded", JSON.stringify(record));
+            const def = new Deferred();
+            if (!expense[0]) {
+                getDistributionWithUserId(data.userId).then((record) => {
+                    let queryForExpenseManager = 'insert into expense_manager(id,expense_area,allocated_expense_amount,user_id,month_name,year) values';
+                    for (let i = 0; i < record.length; i++) {
+                        if (i != record.length - 1) {
+                            queryForExpenseManager = `${queryForExpenseManager}('${record[i].id}','${record[i].expense_area}',${record[i].allocated_expense_amount},'${record[i].user_id}','${currentMonth()}',${currentYear()}),`;
+                        }
+                        else {
+                            queryForExpenseManager = `${queryForExpenseManager}('${record[i].id}','${record[i].expense_area}',${record[i].allocated_expense_amount},'${record[i].user_id}','${currentMonth()}',${currentYear()})`;
+                        }
+                    }
+                    executeQuery(queryForExpenseManager).then(() => {
+                        executeQuery(selectQuery).then((exp) => {
+                            def.resolve(exp)
+                        })
+                    })
                 });
-            })
+
+            } else {
+                def.resolve(expense);
+            }
+            def.then((expense) => {
+                const id = expense[0].id;
+                let totalExpense = expense[0].total_expense_amount;
+                if (totalExpense) totalExpense = parseFloat(totalExpense) + parseFloat(data.amount);
+                else totalExpense = parseFloat(data.amount);
+                addExpense(totalExpense, id, data.userId, client);
+            });
         })
     });
 });
@@ -325,6 +343,17 @@ const connectSql = (conf) => {
         }
     });
     return sqlDef;
+}
+
+const addExpense = (totalExpense, id, userId, client) => {
+    const updateQuery = `update expense_manager set total_expense_amount=${totalExpense} where id='${id}'`;
+    executeQuery(updateQuery).then(() => {
+        const query = `select* from expense_manager where user_id='${userId}' and month_name='${currentMonth().toLowerCase()}' 
+        and year=${currentYear()}`
+        executeQuery(query).then((record) => {
+            client.emit("expenseAdded", JSON.stringify(record));
+        });
+    })
 }
 
 const executeQuery = (query, conf) => {

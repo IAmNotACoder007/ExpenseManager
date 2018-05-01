@@ -10,7 +10,7 @@
     height: 100%;
     width: 100%;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
     display: flex;
 }
 
@@ -21,3 +21,21 @@
 .budget-container .no-expense-found{
     height: 100%;
 }   
+
+.chart-instructions .chart-color{
+    height: 10px;
+    width: 10px;
+    margin-right: 5px;
+}
+
+.chart-instructions .instructions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.chart-instructions .expense-area {
+    font-family: verdana;
+    font-size: 12px;
+    text-transform: capitalize;
+}
