@@ -41,7 +41,7 @@ class Distribution extends Component {
         };
 
         this.expenses = [];
-        const deleteIcon = <MuiThemeProvider><DeleteIcon tooltip="Delete" className="delete-icon" /></MuiThemeProvider>;
+        const deleteIcon = <MuiThemeProvider><DeleteIcon /></MuiThemeProvider>;
         const editIcon = <MuiThemeProvider><EditIcon /></MuiThemeProvider>;
 
         this.populateDistributionTable = () => {

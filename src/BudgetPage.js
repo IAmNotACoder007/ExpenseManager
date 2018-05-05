@@ -64,6 +64,10 @@ class Budget extends Component {
                     val = this.options.data[categ];
                     var slice_angle = 2 * Math.PI * val / total_value;
 
+                    var pieRadius = Math.min(this.canvas.width / 2, this.canvas.height / 2);
+                    var labelX = this.canvas.width / 2 + (pieRadius / 2) * Math.cos(start_angle + slice_angle / 2);
+                    var labelY = this.canvas.height / 2 + (pieRadius / 2) * Math.sin(start_angle + slice_angle / 2);
+
                     drawPieSlice(
                         this.ctx,
                         this.canvas.width / 2,
@@ -71,7 +75,10 @@ class Budget extends Component {
                         Math.min(this.canvas.width / 2, this.canvas.height / 2),
                         start_angle,
                         start_angle + slice_angle,
-                        this.colors[color_index % this.colors.length]
+                        this.colors[color_index % this.colors.length],
+                        labelX,
+                        labelY,
+                        val,
                     );
 
                     start_angle += slice_angle;
@@ -80,30 +87,21 @@ class Budget extends Component {
 
             }
         }
+       
 
-        this.drawLine = (ctx, startX, startY, endX, endY) => {
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-        }
-
-        this.drawArc = (ctx, centerX, centerY, radius, startAngle, endAngle) => {
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-            ctx.stroke();
-        }
-
-        const drawPieSlice = (ctx, centerX, centerY, radius, startAngle, endAngle, color) => {
+        const drawPieSlice = (ctx, centerX, centerY, radius, startAngle, endAngle, color, labelX, labelY, label) => {
             ctx.fillStyle = color;
             ctx.shadowColor = 'white';
             ctx.shadowBlur = 1;
-          //  ctx.strokeText('Hello world', 200,160 );  
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.closePath();
             ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.font = "10px verdana";
+            ctx.textAlign = "center"
+            ctx.fillText(label, Math.round(labelX), Math.round(labelY));
         }
     }
 
