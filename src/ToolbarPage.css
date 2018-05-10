@@ -6,8 +6,8 @@
 }
 
 .page-content {
-    height: 100%;
-    width: 100%;
+    height: calc(100% - 70px);
+    width: calc(100% - 20px);
 }
 
 .app-bar-right-element{
@@ -22,4 +22,19 @@
 
 .app-bar-right-element svg{
     color: white !important;
+}
+
+.menu-item{
+    height: 48px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.87);  
+    text-decoration: none;
+}
+
+.menu-item:hover{
+    background-color: rgba(0, 0, 0, 0.1)
 }

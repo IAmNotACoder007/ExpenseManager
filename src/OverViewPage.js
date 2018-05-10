@@ -47,8 +47,7 @@ class OverView extends Component {
                 limitExceededClass: limitExceededClass
             });
             this.populateExpenseChart();
-        }
-        this.colors = ["#5179D6", "#66CC66", "#EF2F41", "#FFC700", "#61BDF2", "#FF7900", "#7588DD", "#2F5E8C", "#07BACE", "#BAE55C", "#BA1871", "#FFFFCC", "#BDE6FC", "#C7C7C7", "#ADA8FF", "#2FA675"];
+        }       
         this.expenses = []
 
 

@@ -25,6 +25,7 @@ import Enumerable from '../node_modules/linq';
 import Message from 'material-ui/svg-icons/communication/message';
 import { deepOrange500, transparent, white } from 'material-ui/styles/colors';
 import Snackbar from 'material-ui/Snackbar';
+import { Link } from 'react-router-dom'
 
 
 
@@ -208,11 +209,11 @@ class Toolbar extends Component {
             'border-color': '#285e8e',
             fontFamily: 'verdana',
             'font-size': '15px'
-        }
+        }       
 
         return (
 
-            <div className="main-page-container">
+            <div className="header-container">
 
                 <MuiThemeProvider>
                     <AppBar
@@ -236,10 +237,10 @@ class Toolbar extends Component {
                     <MuiThemeProvider>
                         <Drawer docked={false} open={this.state.isCollapsed} onRequestChange={this.handleClose}>
                             <MenuItem disabled={true} style={menuStyle}>Expense Manager</MenuItem>
-                            <MenuItem onClick={this.renderOverviewPage}>Dashboard</MenuItem>
-                            <MenuItem onClick={this.renderHistoryPage}>History</MenuItem>
-                            <MenuItem onClick={this.renderBudgetPage}>Budget</MenuItem>
-                            <MenuItem onClick={this.renderDistributionPage}>Distribution</MenuItem>
+                            <Link to="/" className="menu-item" onClick={this.handleClose}>Dashboard</Link>
+                            <Link to="/history" className="menu-item" onClick={this.handleClose}>History</Link>
+                            <Link to="/budget" className="menu-item" onClick={this.handleClose}>Budget</Link>
+                            <Link to="/distribution" className="menu-item" onClick={this.handleClose}>Distribution</Link>
                         </Drawer>
                     </MuiThemeProvider>
                     <MuiThemeProvider>
@@ -298,10 +299,7 @@ class Toolbar extends Component {
                                 floatingLabelText="Confirm New Password" hintText="Confirm New Password" errorText={this.state.newPassword} />
 
                         </Dialog>
-                    </MuiThemeProvider>
-                    <div id="pageContent" className="page-content">
-                        <OverView />
-                    </div>
+                    </MuiThemeProvider>                   
                 </div>
             </div>
 
