@@ -65,32 +65,7 @@ class Toolbar extends Component {
             notificationMessage: "",
             showNotification: false,
             showChangePasswordDialog: false
-        };
-
-        this.renderHistoryPage = () => {
-            ReactDOM.render(<History socket={socket} userId={userId} />, document.getElementById('pageContent'))
-            this.handleClose();
-        }
-
-        this.renderOverviewPage = () => {
-            ReactDOM.render(<OverView socket={socket} userId={userId} />, document.getElementById('pageContent'))
-            this.handleClose();
-        }
-
-        this.renderBudgetPage = () => {
-            ReactDOM.render(<Budget socket={socket} userId={userId} />, document.getElementById('pageContent'))
-            this.handleClose();
-        }
-
-        this.renderDistributionPage = () => {
-            ReactDOM.render(<Distribution socket={socket} userId={userId} />, document.getElementById('pageContent'))
-            this.handleClose();
-        }
-
-        this.logout = () => {
-            cookie.remove("userId");
-            ReactDOM.render(<Login socket={socket} />, document.getElementById('main-page-container'));
-        }
+        };      
 
         this.addExpense = () => {
             const amount = document.getElementById("expenseAmount").value;
@@ -229,7 +204,8 @@ class Toolbar extends Component {
                         >
                             <MenuItem primaryText="Add Expense" onClick={this.showAddExpenseDialog} />
                             <MenuItem primaryText="Change Password" onClick={this.showChangePasswordDialog} />
-                            <MenuItem primaryText="Sign out" onClick={this.logout} />
+                            <Link to="/logout" className="menu-item">Sign out</Link>
+                            
                         </IconMenu></div>}
                     />
                 </MuiThemeProvider>

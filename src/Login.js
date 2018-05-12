@@ -15,12 +15,21 @@ import openSocket from 'socket.io-client';
 import CircularProgress from 'material-ui/CircularProgress';
 import ReactDOMServer from 'react-dom/server';
 import cookie from 'react-cookies';
+import Routes from './routes';
+import {
+    BrowserRouter as Router,
+    Route,
+    Link,
+    Redirect,
+    withRouter
+} from "react-router-dom";
+
 
 
 class Login extends Component {
     constructor(prop) {
         super(prop);
-        const socket = prop.socket;
+        const socket = prop.socket;      
         const progressBar = <MuiThemeProvider> <CircularProgress size={80} thickness={5} /></MuiThemeProvider>;
         this.state = {
             userNameErrorText: '',
@@ -36,7 +45,8 @@ class Login extends Component {
             showConfirmationDialog: false,
             otpEmailAddress: '',
             confirmationMsg: "Congratulations!! you have been registered successfully.",
-            loginBoxStyle: '350px'
+            loginBoxStyle: '350px',
+            redirect: false,
         }
 
 
@@ -61,8 +71,9 @@ class Login extends Component {
                 socket.emit('doLogin', { userName: userName, password: password });
                 socket.on('validUser', (data) => {
                     this.setCookie("userId", data[0].id);
-                    this.setCookie("fullName",data[0].full_name)
-                    ReactDOM.render(<Toolbar socket={socket} userId={data[0].id} fullName={data[0].full_name} />, document.getElementById('main-page-container'));
+                    this.setCookie("fullName", data[0].full_name)
+                    this.setState({ redirect: true });
+                    //  ReactDOM.render(<Routes socket={socket} userId={data[0].id} fullName={data[0].full_name} />);
                 });
 
                 socket.on('loginFailed', () => {
@@ -140,8 +151,8 @@ class Login extends Component {
                     this.setState({ showConfirmationDialog: true, confirmationMsg: `Enable to send email on '${emailAddress}', please verify your email or try again later.` });
                 });
 
-                socket.on("emailNotRegistered", () => {                   
-                    this.setState({otpEmailAddress: `'${emailAddress}' is not registered.`,showSpinner: 'none', disabledButton: false });
+                socket.on("emailNotRegistered", () => {
+                    this.setState({ otpEmailAddress: `'${emailAddress}' is not registered.`, showSpinner: 'none', disabledButton: false });
                 });
             }
         }
@@ -263,6 +274,9 @@ class Login extends Component {
             bottom: '4%'
         }
 
+        if (this.state.redirect) {
+            return <Redirect to="/"/>;
+        }
 
         return (
             <div className="login-page-container">
