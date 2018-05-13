@@ -23,7 +23,7 @@ class OverView extends Component {
             expensesDisplay: "flex"
         }
 
-        socket.off("expenseAdded");
+        
         socket.on("expenseAdded", (data) => {
             this.refreshOverview(JSON.parse(data));
         })

@@ -22,10 +22,11 @@ import Dialog from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import Enumerable from '../node_modules/linq';
-import Message from 'material-ui/svg-icons/communication/message';
 import { deepOrange500, transparent, white } from 'material-ui/styles/colors';
 import Snackbar from 'material-ui/Snackbar';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import toastr from "toastr";
+import './toastr.css'
 
 
 
@@ -35,13 +36,13 @@ class Toolbar extends Component {
         const socket = prop.socket;
         const userId = prop.userId;
         this.fullName = prop.fullName;
-
+        toastr.options = { closeButton: true, positionClass: "toast-top-right" };
         socket.on("expenseAdded", () => {
-            this.setState({ showNotification: true, notificationMessage: "Expense Added Successfully." });
+            toastr.success("Expense added successfully");
         });
 
         socket.on("passwordChangedSuccessfully", () => {
-            this.setState({ showNotification: true, notificationMessage: "Password Changed Successfully." });
+            toastr.success("Password changed successfully");
             this.closeDialog();
         });
 
@@ -52,9 +53,6 @@ class Toolbar extends Component {
             this.setState({ isCollapsed: !this.state.isCollapsed })
         };
 
-        this.handleNotificationClose = () => {
-            this.setState({ showNotification: false });
-        }
         this.handleClose = () => this.setState({ isCollapsed: false });
 
         this.state = {
@@ -63,9 +61,8 @@ class Toolbar extends Component {
             expenseAreas: [],
             selectedExpense: 1,
             notificationMessage: "",
-            showNotification: false,
             showChangePasswordDialog: false
-        };      
+        };
 
         this.addExpense = () => {
             const amount = document.getElementById("expenseAmount").value;
@@ -184,7 +181,7 @@ class Toolbar extends Component {
             'border-color': '#285e8e',
             fontFamily: 'verdana',
             'font-size': '15px'
-        }       
+        }
 
         return (
 
@@ -205,7 +202,7 @@ class Toolbar extends Component {
                             <MenuItem primaryText="Add Expense" onClick={this.showAddExpenseDialog} />
                             <MenuItem primaryText="Change Password" onClick={this.showChangePasswordDialog} />
                             <Link to="/logout" className="menu-item">Sign out</Link>
-                            
+
                         </IconMenu></div>}
                     />
                 </MuiThemeProvider>
@@ -238,15 +235,6 @@ class Toolbar extends Component {
                         </Dialog>
                     </MuiThemeProvider>
                     <MuiThemeProvider>
-                        <Snackbar
-                            open={this.state.showNotification}
-                            message={this.state.notificationMessage}
-                            autoHideDuration={3000}
-                            onRequestClose={this.handleNotificationClose}
-                            bodyStyle={notificationStyle}
-                        />
-                    </MuiThemeProvider>
-                    <MuiThemeProvider>
                         <Dialog
                             title="Change Password"
                             actions={[
@@ -275,7 +263,7 @@ class Toolbar extends Component {
                                 floatingLabelText="Confirm New Password" hintText="Confirm New Password" errorText={this.state.newPassword} />
 
                         </Dialog>
-                    </MuiThemeProvider>                   
+                    </MuiThemeProvider>
                 </div>
             </div>
 
