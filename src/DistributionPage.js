@@ -14,6 +14,8 @@ import ReactDOMServer from 'react-dom/server';
 import Paper from 'material-ui/Paper';
 import openSocket from 'socket.io-client';
 import $ from 'jquery';
+import toastr from "toastr";
+import './toastr.css'
 
 
 class Distribution extends Component {
@@ -24,7 +26,7 @@ class Distribution extends Component {
         socket.on("refreshDistribution", (data) => {
             this.refreshDistribution(JSON.parse(data));
         });
-
+        toastr.options = { closeButton: true, positionClass: "toast-top-right", preventDuplicates: true };
         this.state = {
             showAddDistributionDialog: false,
             nameErrorText: '',
@@ -37,7 +39,8 @@ class Distribution extends Component {
             isMultiLine: false,
             numberOfRows: 2,
             buttonClick: () => { this.addDistribution() },
-            noDistributionFound: 'none'
+            noDistributionFound: 'none',
+            expenses: [],
         };
 
         this.expenses = [];
@@ -45,32 +48,34 @@ class Distribution extends Component {
         const editIcon = <MuiThemeProvider><EditIcon /></MuiThemeProvider>;
 
         this.populateDistributionTable = () => {
-            const totalExpense = Enumerable.from(this.expenses).select(x => x.totalExpense).sum();
+            const expense = this.state.expenses;
+            const totalExpense = Enumerable.from(expense).select(x => x.totalExpense).sum();
             const distributionContainer = document.getElementById('distributionTable');
-            if (this.expenses.length) {
-                this.setState({ noDistributionFound: 'none' });
-                this.expenses.forEach((element, index) => {
-                    let lastColumnClass = '';
-                    if (this.expenses.length == index + 1) {
-                        lastColumnClass = "last-column";
-                    }
-                    distributionContainer.innerHTML += `               
-                <div class='expense-area ${lastColumnClass}'>${element.expenseArea}</div>
-                <div class='total-expense ${lastColumnClass}'>${element.totalExpense}</div>
-                <div class='${lastColumnClass}'>${((element.totalExpense * 100) / totalExpense).toFixed(2)}%</div>  
-                <div id='iconsContainer' class='icons-container ${lastColumnClass}'> 
-                <a class='edit-icon material-icons' expenseArea='${element.expenseArea}' totalExpense='${element.totalExpense}' expenseId='${element.id}'>               
-                ${ReactDOMServer.renderToStaticMarkup(editIcon)}  
-                </a>
-                <a id='deleteIcon' class='material-icons' expenseId='${element.id}'>   
-                ${ReactDOMServer.renderToStaticMarkup(deleteIcon)} 
-                </a>   
-                </div>          
-                `;
-                });
-            } else {
-                this.setState({ noDistributionFound: 'flex' });
-            }
+            let expenseJsx = []
+            expense.forEach((element, index) => {
+                let lastColumnClass = '';
+                if (expense.length == index + 1) {
+                    lastColumnClass = "last-column";
+                }
+
+                expenseJsx.push(<div className={`expense-row ${lastColumnClass}`}>
+                    <div className='expense-area' style={{ flex: '1' }}>{element.expenseArea}</div>
+                    <div className='total-expense' style={{ width: '30%' }}>{element.totalExpense}</div>
+                    <div style={{ width: '30%' }}>{((element.totalExpense * 100) / totalExpense).toFixed(2)}%</div>
+                    <div id='iconsContainer' className='icons-container'>
+                        <a className='edit-icon material-icons'>
+                            <MuiThemeProvider><EditIcon onClick={() => { this.editDistribution(element.expenseArea, element.totalExpense, element.id) }} /></MuiThemeProvider>
+                        </a>
+                        <a id='deleteIcon' className='material-icons'>
+                            <MuiThemeProvider><DeleteIcon onClick={() => { this.deleteDistribution(element.id) }} /></MuiThemeProvider>
+                        </a>
+                    </div>
+                </div>)
+
+            });
+            if (!expenseJsx.length) expenseJsx.push(<div className="no-distribution-found" style={{ display: 'flex' }}>No distribution found</div>)
+            return expenseJsx;
+
         }
 
         this.onClick = (event) => {
@@ -93,6 +98,9 @@ class Distribution extends Component {
             this.setState({
                 showConfirmationDialog: true, buttonName: "Delete", buttonClick: () => {
                     socket.emit("deleteDistribution", { id: id, userId: this.userId });
+                    socket.on("distributionDeleted", () => {
+                        toastr.info("Distribution deleted");
+                    })
                     this.closeDialog();
                 }
             });
@@ -141,14 +149,11 @@ class Distribution extends Component {
         }
 
         this.refreshDistribution = (distributions) => {
-            const distributionTable = document.getElementById('distributionTable');
-            distributionTable.innerHTML = "";
-            this.expenses = [];
+            let expenses = [];
             distributions.forEach((distribution) => {
-                this.expenses.push({ id: distribution.id, expenseArea: distribution.expense_area, totalExpense: distribution.allocated_expense_amount });
+                expenses.push({ id: distribution.id, expenseArea: distribution.expense_area, totalExpense: distribution.allocated_expense_amount });
             });
-            this.populateDistributionTable();
-            distributionTable.onclick = this.onClick.bind(this);
+            this.setState({ expenses: expenses });
         }
 
         this.validate = (expenseArea) => {
@@ -223,10 +228,8 @@ class Distribution extends Component {
                 <MuiThemeProvider>
                     <Paper style={style} zDepth={1} rounded={false}>
                         <div id="distributionTable" className="distribution-table custom-scrollBar">
-
+                            {this.populateDistributionTable()}
                         </div>
-
-                        <div className="no-distribution-found" style={{ display: this.state.noDistributionFound }}>No distribution found</div>
                         <div className="add-new-link">
                             <FlatButton label="Add Distributions" primary={true} onClick={() => {
                                 this.addNewDistribution();

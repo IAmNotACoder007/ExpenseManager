@@ -234,6 +234,7 @@ io.on('connection', (client) => {
                     else {
                         getDistributionWithUserId(data.userId).then((records) => {
                             client.emit("refreshDistribution", JSON.stringify(records));
+                            client.emit("distributionDeleted");
                         });
                     }
                 })
