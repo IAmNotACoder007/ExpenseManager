@@ -16,6 +16,8 @@ import CircularProgress from 'material-ui/CircularProgress';
 import ReactDOMServer from 'react-dom/server';
 import cookie from 'react-cookies';
 import Routes from './routes';
+import toastr from "toastr";
+import './toastr.css'
 import {
     BrowserRouter as Router,
     Route,
@@ -31,6 +33,7 @@ class Login extends Component {
         super(prop);
         const socket = prop.socket;      
         const progressBar = <MuiThemeProvider> <CircularProgress size={80} thickness={5} /></MuiThemeProvider>;
+        toastr.options = { closeButton: true, positionClass: "toast-top-right", preventDuplicates: true };
         this.state = {
             userNameErrorText: '',
             passwordErrorText: '',
@@ -41,8 +44,7 @@ class Login extends Component {
             signInFullNameErrorText: '',
             signInMobileErrorText: '',
             showSpinner: 'none',
-            disabledButton: false,
-            showConfirmationDialog: false,
+            disabledButton: false,            
             otpEmailAddress: '',
             confirmationMsg: "Congratulations!! you have been registered successfully.",
             loginBoxStyle: '350px',
@@ -108,7 +110,7 @@ class Login extends Component {
 
                 socket.on("signedUpSuccessfully", (data) => {
                     this.closeDialog();
-                    this.setState({ showConfirmationDialog: true });
+                    toastr.success("Registered successfully");
                 })
 
                 //put some spinner here and close the dialog once signIn finished
@@ -125,8 +127,7 @@ class Login extends Component {
                 signInFullNameErrorText: '',
                 signInUserNameErrorText: '',
                 signInMobileErrorText: '',
-                signInPasswordErrorText: '',
-                showConfirmationDialog: false,
+                signInPasswordErrorText: '',               
                 showSpinner: 'none',
                 disabledButton: false,
                 showSendPasswordDialog: false
@@ -143,12 +144,12 @@ class Login extends Component {
 
                 socket.on("emailSendSuccessfully", () => {
                     this.closeDialog();
-                    this.setState({ showConfirmationDialog: true, confirmationMsg: `Your password has been send on '${emailAddress}'` });
+                    toastr.success(`Your password has been send on '${emailAddress}'`);                    
                 })
 
                 socket.on("emailSendingFailed", () => {
                     this.closeDialog();
-                    this.setState({ showConfirmationDialog: true, confirmationMsg: `Enable to send email on '${emailAddress}', please verify your email or try again later.` });
+                    toastr.error(`Enable to send email on '${emailAddress}', please verify your email or try again later.`);                    
                 });
 
                 socket.on("emailNotRegistered", () => {
@@ -331,18 +332,7 @@ class Login extends Component {
                         <CircularProgress style={spinnerStyle} size={30} thickness={3} />
                     </Dialog>
                 </MuiThemeProvider>
-
-                <MuiThemeProvider>
-                    <Dialog
-                        actions={confirmationDialogActions}
-                        modal={false}
-                        open={this.state.showConfirmationDialog}
-                        onRequestClose={this.handleClose}
-                        contentStyle={customContentStyle}>
-
-                        {this.state.confirmationMsg}
-                    </Dialog>
-                </MuiThemeProvider>
+               
 
                 <MuiThemeProvider>
                     <Dialog

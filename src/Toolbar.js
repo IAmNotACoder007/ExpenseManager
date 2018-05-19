@@ -36,7 +36,7 @@ class Toolbar extends Component {
         const socket = prop.socket;
         const userId = prop.userId;
         this.fullName = prop.fullName;
-        toastr.options = { closeButton: true, positionClass: "toast-top-right" };
+        toastr.options = { closeButton: true, positionClass: "toast-top-right", preventDuplicates: true };
         socket.on("expenseAdded", () => {
             toastr.success("Expense added successfully");
         });
