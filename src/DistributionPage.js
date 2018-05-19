@@ -38,8 +38,7 @@ class Distribution extends Component {
             buttonName: "Save",
             isMultiLine: false,
             numberOfRows: 2,
-            buttonClick: () => { this.addDistribution() },
-            noDistributionFound: 'none',
+            buttonClick: () => { this.addDistribution() },           
             expenses: [],
         };
 
@@ -76,23 +75,7 @@ class Distribution extends Component {
             if (!expenseJsx.length) expenseJsx.push(<div className="no-distribution-found" style={{ display: 'flex' }}>No distribution found</div>)
             return expenseJsx;
 
-        }
-
-        this.onClick = (event) => {
-            let isDeleteAction = event.path.filter(function (n) { if (n.id == "deleteIcon") return n; });
-            if (isDeleteAction.length) {
-                const id = isDeleteAction[0].getAttribute("expenseId")
-                this.deleteDistribution(id);
-            }
-
-            let isEditIcon = event.path.filter(function (n) { if (Enumerable.from(n.classList).any(x => x == "edit-icon")) return n; });
-            if (isEditIcon.length) {
-                const name = isEditIcon[0].getAttribute("expenseArea");
-                const totalExpense = isEditIcon[0].getAttribute("totalExpense")
-                const id = isEditIcon[0].getAttribute("expenseId")
-                this.editDistribution(name, totalExpense, id);
-            }
-        }
+        }       
 
         this.deleteDistribution = (id) => {
             this.setState({

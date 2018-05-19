@@ -7,15 +7,27 @@
 }
 
 .history-distribution-table {
-    display: grid;
-    grid-template-columns: auto auto 70px;
+    display: flex;
+    flex-direction: column;
     padding: 15px;
     font-size: 15px;
     max-height: calc(100% - 100px);
+    height: calc(100% - 100px);
     overflow: auto;
     padding-top: 0;
     padding-bottom: 0;
     margin: 5px;
+}
+
+.history-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgb(224, 224, 224);
+    min-height: 50px;
+}
+
+.history-row.last-column{
+    border: none
 }
 
 .history-distribution-table .expense-area {
@@ -23,13 +35,28 @@
 }
 
 .history-distribution-table div.row {
-    line-height: 30px;
-    border-bottom: 1px solid rgb(224, 224, 224);
+    line-height: 30px;   
     padding: 10px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-.history-distribution-table div.last-column {
-    border: none
+.history-distribution-table div.row.percentage{
+    justify-content: flex-end;
+}
+
+.expense-area.row {
+    flex: 1;
+}
+
+.total-expense.row {
+    width: 30%;
+}
+
+.row {
+    width: 15%;
 }
 
 .total-expense-amount {
@@ -52,7 +79,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: calc(100% - 200px);
+    height: 100%;
     font-size: 20px;
 }
 

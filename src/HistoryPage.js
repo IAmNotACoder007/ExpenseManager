@@ -5,7 +5,6 @@ import './HistoryPageStyle.css';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import Enumerable from '../node_modules/linq';
-import Divider from 'material-ui/Divider';
 import ReactDOMServer from 'react-dom/server';
 import $ from 'jquery';
 
@@ -18,17 +17,17 @@ class History extends Component {
         this.userId = prop.userId;
         this.months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         this.monthNames = [];
-        this.years = []
-        this.expenses = []
+        this.years = []        
         this.date = new Date();
 
         this.state = {
             selectedMonth: 0,
             selectedYear: 0,
-            totalExpense: 0
+            totalExpense: 0,
+            expenses: []
         }
 
-        socket.on("expenseAdded",(data)=>{
+        socket.on("expenseAdded", (data) => {
             this.refreshHistory(JSON.parse(data));
         })
 
@@ -46,30 +45,27 @@ class History extends Component {
                 menus.push(<MenuItem value={i + 1} primaryText={this.years[i]} />)
             }
             return menus;
-        }
+        }       
 
-        const divider = <MuiThemeProvider> <Divider /> </MuiThemeProvider>;
-
-        this.populateDistributionTable = () => {
-            const distributionContainer = document.getElementById('historyDistributionTable');
-            if (!this.expenses.length) {
-                document.getElementsByClassName("total-expense-amount")[0].style.display = 'none';
-                document.getElementById("noExpenseFound").style.display = "flex";
-                return;
-            }
-            document.getElementById("noExpenseFound").style.display = "none";
-            document.getElementsByClassName("total-expense-amount")[0].style.display = 'flex';
-            this.expenses.forEach((element, index) => {
+        this.populateHistoryTable = () => {            
+            let historyJsx = [];
+            const expenses = this.state.expenses;
+            expenses.forEach((element, index) => {
                 let lastColumnClass = '';
-                if (this.expenses.length == index + 1) {
+                if (expenses.length == index + 1) {
                     lastColumnClass = "last-column";
                 }
-                distributionContainer.innerHTML += `               
-                <div class='expense-area row ${lastColumnClass}'>${element.expenseArea}</div>
-                <div class='total-expense row ${lastColumnClass}'>${element.totalExpense}</div>
-                <div class='row ${lastColumnClass}'>${((element.totalExpense * 100) / this.state.totalExpense).toFixed(2)}%</div>                       
-                `;
+                historyJsx.push(
+                    <div id={element.id} className={`history-row ${lastColumnClass}`}>
+                        <div className='expense-area row'>{element.expenseArea}</div>
+                        <div className='total-expense row'>{element.totalExpense}</div>
+                        <div className='row percentage'>{((element.totalExpense * 100) / this.state.totalExpense).toFixed(2)}%</div>
+                    </div>
+                );
             });
+
+            if (!historyJsx.length) historyJsx.push(<div id="noExpenseFound" className="no-expense-found" style={{ display: 'flex' }}> No expenses found</div>);
+            return historyJsx;
         }
 
         this.handleMonthChange = (event, index, value) => {
@@ -100,18 +96,14 @@ class History extends Component {
             });
         }
 
-        this.refreshHistory = (history) => {
-            const historyTable=document.getElementById('historyDistributionTable');
-            if(!historyTable) return;
-            history=Enumerable.from(history).where(x=>x.total_expense_amount != null).toArray();
-            this.expenses = [];
-            historyTable.innerHTML = '';
+        this.refreshHistory = (history) => {           
+            history = Enumerable.from(history).where(x => x.total_expense_amount != null).toArray();
+            const expenses = [];            
             history.forEach((expense, index) => {
-                this.expenses.push({ expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount });
+                expenses.push({ id: expense.id, expenseArea: expense.expense_area, totalExpense: expense.total_expense_amount });
             });
-            const totalExpense = Enumerable.from(this.expenses).select(x => x.totalExpense).sum();
-            this.setState({ totalExpense: totalExpense });
-            this.populateDistributionTable();
+            const totalExpense = Enumerable.from(expenses).select(x => x.totalExpense).sum();
+            this.setState({ totalExpense: totalExpense, expenses: expenses });           
         }
 
 
@@ -147,9 +139,11 @@ class History extends Component {
                         <DropDownMenu value={this.state.selectedYear} style={ddstyles.customWidth} autoWidth={false} onChange={this.handleYearChange}>
                             {this.getYearsMenu()}
                         </DropDownMenu>
-                        <div id="historyDistributionTable" className="history-distribution-table custom-scrollBar"></div>
+                        <div id="historyDistributionTable" className="history-distribution-table custom-scrollBar">
+                            {this.populateHistoryTable()}
+                        </div>
                         <div className="total-expense-amount">Total Expense: {this.state.totalExpense}</div>
-                        <div id="noExpenseFound" className="no-expense-found" style={{ display: 'none' }}> No expenses found</div>
+
                     </Paper>
                 </MuiThemeProvider>
 
@@ -165,7 +159,7 @@ class History extends Component {
             success: (data) => {
                 const history = JSON.parse(data);
                 this.monthNames = history.months;
-                this.years = history.years;               
+                this.years = history.years;
                 const monthToSelect = history.months.findIndex(m => this.months[this.date.getMonth()].toLowerCase() === m.toLowerCase());
                 this.setState({ selectedMonth: monthToSelect + 1, selectedYear: history.years.indexOf(this.date.getFullYear()) + 1 });
                 this.refreshHistory(history.expenses);
