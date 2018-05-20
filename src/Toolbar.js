@@ -1,29 +1,19 @@
 import React, { Component } from 'react';
-import OverView from './OverViewPage';
-import FolderBar from './FolderBarPage';
 import './ToolbarPage.css';
 import $ from 'jquery';
 import AppBar from 'material-ui/AppBar';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
-import History from './HistoryPage'
-import ReactDOM from 'react-dom';
-import Budget from './BudgetPage';
-import Distribution from './DistributionPage';
 import FlatButton from 'material-ui/FlatButton';
-import Login from './Login';
-import cookie from 'react-cookies'
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import Dialog from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import Enumerable from '../node_modules/linq';
-import { deepOrange500, transparent, white } from 'material-ui/styles/colors';
-import Snackbar from 'material-ui/Snackbar';
+import {white } from 'material-ui/styles/colors';
 import { Link } from 'react-router-dom';
 import toastr from "toastr";
 import './toastr.css'
@@ -103,7 +93,7 @@ class Toolbar extends Component {
         this.getExpense = () => {
             let menus = [];
             for (let i = 0; i < this.state.expenseAreas.length; i++) {
-                menus.push(<MenuItem value={i + 1} primaryText={this.state.expenseAreas[i]} />)
+                menus.push(<MenuItem key={this.state.expenseAreas[i]} value={i + 1} primaryText={this.state.expenseAreas[i]} />)
             }
             return menus;
         }
@@ -132,7 +122,7 @@ class Toolbar extends Component {
             if (!newPassword || !confirmNewPassword) {
                 this.setState({ newPassword: "New password must be specified." });
                 isValid = false;
-            } else if (newPassword != confirmNewPassword) {
+            } else if (newPassword !== confirmNewPassword) {
                 this.setState({ newPassword: "New passwords are not same." });
                 isValid = false;
             }
@@ -149,7 +139,7 @@ class Toolbar extends Component {
     render() {
         const menuStyle = {
             color: 'white',
-            'font-size': '25px',
+            fontSize: '25px',
             backgroundColor: 'rgb(0, 188, 212)',
             paddingBottom: '10px'
         }
@@ -174,14 +164,7 @@ class Toolbar extends Component {
             customWidth: {
                 width: 275,
             },
-        };
-
-        const notificationStyle = {
-            backgroundColor: '#3071a9',
-            'border-color': '#285e8e',
-            fontFamily: 'verdana',
-            'font-size': '15px'
-        }
+        };       
 
         return (
 
@@ -189,8 +172,7 @@ class Toolbar extends Component {
 
                 <MuiThemeProvider>
                     <AppBar
-                        title="Expense Manager"
-                        iconClassNameRight="muidocs-icon-navigation-expand-more"
+                        title="Expense Manager"                       
                         onLeftIconButtonClick={this.openFolderBar}
                         iconElementRight={<div className="app-bar-right-element">{this.fullName}<IconMenu
                             iconButtonElement={

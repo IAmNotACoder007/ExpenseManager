@@ -67,7 +67,6 @@ class OverView extends Component {
                 scaleContainer.innerHTML = '';
                 for (let i = 0; i < this.expenses.length; i++) {
                     const element = this.expenses[i];
-                    const totalAvailableWidth = container.offsetWidth;
                     let budgetHeight = `${maxHeight}px`;                   
                     budgetHeight = `${((maxHeight / maxRange) * element.budget).toFixed(2)}px`;
                    
@@ -145,7 +144,7 @@ class OverView extends Component {
                         <div className="expense-instruction"></div>
                         <div>Expense</div>
                     </div>
-                    <div id="noExpenseFound" class="no-expense-found" style={{ display: this.state.noExpensesFound }}> No expenses found</div>
+                    <div id="noExpenseFound" className="no-expense-found" style={{ display: this.state.noExpensesFound }}> No expenses found</div>
                 </div>
             </div>
         )

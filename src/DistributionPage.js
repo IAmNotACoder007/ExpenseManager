@@ -3,16 +3,11 @@ import Enumerable from '../node_modules/linq';
 import './DistributionPage.css';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import RaisedButton from 'material-ui/RaisedButton';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TextField from 'material-ui/TextField';
-import Button from './Button';
-import SimpleTable from './SimpleTable';
 import DeleteIcon from 'react-material-icons/icons/action/delete';
 import EditIcon from 'react-material-icons/icons/image/edit';
-import ReactDOMServer from 'react-dom/server';
 import Paper from 'material-ui/Paper';
-import openSocket from 'socket.io-client';
 import $ from 'jquery';
 import toastr from "toastr";
 import './toastr.css'
@@ -42,22 +37,18 @@ class Distribution extends Component {
             expenses: [],
         };
 
-        this.expenses = [];
-        const deleteIcon = <MuiThemeProvider><DeleteIcon /></MuiThemeProvider>;
-        const editIcon = <MuiThemeProvider><EditIcon /></MuiThemeProvider>;
-
+        this.expenses = [];        
         this.populateDistributionTable = () => {
             const expense = this.state.expenses;
             const totalExpense = Enumerable.from(expense).select(x => x.totalExpense).sum();
-            const distributionContainer = document.getElementById('distributionTable');
             let expenseJsx = []
             expense.forEach((element, index) => {
                 let lastColumnClass = '';
-                if (expense.length == index + 1) {
+                if (expense.length === index + 1) {
                     lastColumnClass = "last-column";
                 }
 
-                expenseJsx.push(<div className={`expense-row ${lastColumnClass}`}>
+                expenseJsx.push(<div key={element.id} className={`expense-row ${lastColumnClass}`}>
                     <div className='expense-area' style={{ flex: '1' }}>{element.expenseArea}</div>
                     <div className='total-expense' style={{ width: '30%' }}>{element.totalExpense}</div>
                     <div style={{ width: '30%' }}>{((element.totalExpense * 100) / totalExpense).toFixed(2)}%</div>
@@ -72,7 +63,7 @@ class Distribution extends Component {
                 </div>)
 
             });
-            if (!expenseJsx.length) expenseJsx.push(<div className="no-distribution-found" style={{ display: 'flex' }}>No distribution found</div>)
+            if (!expenseJsx.length) expenseJsx.push(<div key={'noDistributionFound'} className="no-distribution-found" style={{ display: 'flex' }}>No distribution found</div>)
             return expenseJsx;
 
         }       
@@ -118,7 +109,7 @@ class Distribution extends Component {
                 //need to make sure that distribution and amount must be of same size.
                 const noOfDistributions = distributions.length;
                 const noOfAmounts = amounts.length;
-                if (noOfDistributions != noOfAmounts) {
+                if (noOfDistributions !== noOfAmounts) {
                     if (noOfDistributions > noOfAmounts) distributions = distributions.slice(0, noOfAmounts);
                     else if (noOfDistributions < noOfAmounts) amounts = amounts.slice(0, noOfDistributions);
                 }
@@ -149,11 +140,11 @@ class Distribution extends Component {
             else {
                 const distributions = distributionNameText.split("\n");
                 const duplicateDistributions = distributions.filter((value) => {
-                    const expense = Enumerable.from(this.expenses).where(x => x.expenseArea == value).firstOrDefault(null);
+                    const expense = Enumerable.from(this.expenses).where(x => x.expenseArea === value).firstOrDefault(null);
                     if (expense != null) return expense.expenseArea;
                 });
                 if (duplicateDistributions.length) {
-                    if (!expenseArea || expenseArea != duplicateDistributions) {
+                    if (!expenseArea || expenseArea !== duplicateDistributions) {
                         this.setState({ nameErrorText: `${duplicateDistributions.join(',')} already exits.` });
                         isValid = false;
                     }
@@ -261,8 +252,7 @@ class Distribution extends Component {
             cache: false,
             data: { userId: this.userId },
             success: (data) => {
-                this.refreshDistribution(JSON.parse(data));
-                console.log(data)
+                this.refreshDistribution(JSON.parse(data));               
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());

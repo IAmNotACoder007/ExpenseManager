@@ -20,7 +20,6 @@ class Budget extends Component {
                 var chartCanvas = document.getElementById("chartCanvas");
                 chartCanvas.width = 300;
                 chartCanvas.height = 300;
-                var ctx = chartCanvas.getContext("2d");
                 var myVinyls = Object.assign({}, ...this.expenses.map(x => ({ [x.expenseArea]: x.budget })));
                 var chart = new pieChart(
                     {
@@ -125,7 +124,7 @@ class Budget extends Component {
                             <div id="chartInstructions" className="chart-instructions">
                             </div>
                         </div>
-                        <div id="noExpenseFound" class="no-expense-found" style={{ display: this.state.noBudgetFound }}> No budget found</div>
+                        <div id="noExpenseFound" className="no-expense-found" style={{ display: this.state.noBudgetFound }}> No budget found</div>
                     </Paper>
                 </MuiThemeProvider>
             </div>
@@ -142,8 +141,7 @@ class Budget extends Component {
                 for (var { expense_area: expenseArea, allocated_expense_amount: budget } of JSON.parse(data)) {
                     this.expenses.push({ expenseArea: expenseArea, budget: budget })
                 }
-                this.refreshBudget();
-                console.log(data)
+                this.refreshBudget();               
             },
             error: (xhr, status, err) => {
                 console.error(this.props.url, status, err.toString());

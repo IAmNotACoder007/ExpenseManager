@@ -5,7 +5,6 @@ import './HistoryPageStyle.css';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import Enumerable from '../node_modules/linq';
-import ReactDOMServer from 'react-dom/server';
 import $ from 'jquery';
 
 
@@ -34,7 +33,7 @@ class History extends Component {
         this.getMonthsMenu = () => {
             let menus = [];
             for (let i = 0; i < this.monthNames.length; i++) {
-                menus.push(<MenuItem value={i + 1} primaryText={this.monthNames[i]} />)
+                menus.push(<MenuItem value={i + 1} key={this.monthNames[i]} primaryText={this.monthNames[i]} />)
             }
             return menus;
         }
@@ -42,7 +41,7 @@ class History extends Component {
         this.getYearsMenu = () => {
             let menus = [];
             for (let i = 0; i < this.years.length; i++) {
-                menus.push(<MenuItem value={i + 1} primaryText={this.years[i]} />)
+                menus.push(<MenuItem value={i + 1} key={this.years[i]} primaryText={this.years[i]} />)
             }
             return menus;
         }       
@@ -52,11 +51,11 @@ class History extends Component {
             const expenses = this.state.expenses;
             expenses.forEach((element, index) => {
                 let lastColumnClass = '';
-                if (expenses.length == index + 1) {
+                if (expenses.length === index + 1) {
                     lastColumnClass = "last-column";
                 }
                 historyJsx.push(
-                    <div id={element.id} className={`history-row ${lastColumnClass}`}>
+                    <div key={element.id} className={`history-row ${lastColumnClass}`}>
                         <div className='expense-area row'>{element.expenseArea}</div>
                         <div className='total-expense row'>{element.totalExpense}</div>
                         <div className='row percentage'>{((element.totalExpense * 100) / this.state.totalExpense).toFixed(2)}%</div>
@@ -64,7 +63,7 @@ class History extends Component {
                 );
             });
 
-            if (!historyJsx.length) historyJsx.push(<div id="noExpenseFound" className="no-expense-found" style={{ display: 'flex' }}> No expenses found</div>);
+            if (!historyJsx.length) historyJsx.push(<div key={'noExpenseFound'} id="noExpenseFound" className="no-expense-found" style={{ display: 'flex' }}> No expenses found</div>);
             return historyJsx;
         }
 
@@ -126,7 +125,7 @@ class History extends Component {
         };
 
         const menuStyle = {
-            'text-transform': 'uppercase'
+            textTransform: 'uppercase'
         }
 
         return (

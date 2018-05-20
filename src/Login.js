@@ -5,34 +5,20 @@ import './LoginPageStyle.css'
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
-import Toolbar from './Toolbar'
-import ReactDOM from 'react-dom';
 import AppBar from 'material-ui/AppBar';
-import IconButton from 'material-ui/IconButton';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import Dialog from 'material-ui/Dialog';
-import openSocket from 'socket.io-client';
 import CircularProgress from 'material-ui/CircularProgress';
-import ReactDOMServer from 'react-dom/server';
 import cookie from 'react-cookies';
-import Routes from './routes';
 import toastr from "toastr";
 import './toastr.css'
-import {
-    BrowserRouter as Router,
-    Route,
-    Link,
-    Redirect,
-    withRouter
-} from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 
 
 class Login extends Component {
     constructor(prop) {
         super(prop);
-        const socket = prop.socket;      
-        const progressBar = <MuiThemeProvider> <CircularProgress size={80} thickness={5} /></MuiThemeProvider>;
+        const socket = prop.socket;
         toastr.options = { closeButton: true, positionClass: "toast-top-right", preventDuplicates: true };
         this.state = {
             userNameErrorText: '',
@@ -44,21 +30,14 @@ class Login extends Component {
             signInFullNameErrorText: '',
             signInMobileErrorText: '',
             showSpinner: 'none',
-            disabledButton: false,            
+            disabledButton: false,
             otpEmailAddress: '',
             confirmationMsg: "Congratulations!! you have been registered successfully.",
             loginBoxStyle: '350px',
             redirect: false,
+            showSendPasswordDialog: false
         }
 
-
-        const dbConfig = {
-            server: "DESKTOP-LR002GL",
-            database: "Expense Manager",
-            user: "sa",
-            password: "admin123",
-            port: 1433
-        };
         this.setCookie = (name, val) => {
             cookie.save(name, val, { path: "/" });
         };
@@ -75,7 +54,6 @@ class Login extends Component {
                     this.setCookie("userId", data[0].id);
                     this.setCookie("fullName", data[0].full_name)
                     this.setState({ redirect: true });
-                    //  ReactDOM.render(<Routes socket={socket} userId={data[0].id} fullName={data[0].full_name} />);
                 });
 
                 socket.on('loginFailed', () => {
@@ -111,12 +89,7 @@ class Login extends Component {
                 socket.on("signedUpSuccessfully", (data) => {
                     this.closeDialog();
                     toastr.success("Registered successfully");
-                })
-
-                //put some spinner here and close the dialog once signIn finished
-                //after that show some confirmation dialog for user.
-                // this.closeDialog();
-
+                });
             }
         }
 
@@ -127,7 +100,7 @@ class Login extends Component {
                 signInFullNameErrorText: '',
                 signInUserNameErrorText: '',
                 signInMobileErrorText: '',
-                signInPasswordErrorText: '',               
+                signInPasswordErrorText: '',
                 showSpinner: 'none',
                 disabledButton: false,
                 showSendPasswordDialog: false
@@ -144,12 +117,12 @@ class Login extends Component {
 
                 socket.on("emailSendSuccessfully", () => {
                     this.closeDialog();
-                    toastr.success(`Your password has been send on '${emailAddress}'`);                    
+                    toastr.success(`Your password has been send on '${emailAddress}'`);
                 })
 
                 socket.on("emailSendingFailed", () => {
                     this.closeDialog();
-                    toastr.error(`Enable to send email on '${emailAddress}', please verify your email or try again later.`);                    
+                    toastr.error(`Enable to send email on '${emailAddress}', please verify your email or try again later.`);
                 });
 
                 socket.on("emailNotRegistered", () => {
@@ -181,7 +154,7 @@ class Login extends Component {
         }
 
         const onSignInEmailChange = (event, newValue) => {
-            if (newValue && newValue.indexOf('@') == -1) this.setState({ signInEmailErrorText: 'Email must contains @.' });
+            if (newValue && newValue.indexOf('@') === -1) this.setState({ signInEmailErrorText: 'Email must contains @.' });
             else if (newValue) this.setState({ signInEmailErrorText: '' });
         }
 
@@ -190,7 +163,7 @@ class Login extends Component {
         }
 
         const onSignInMobileChange = (event, newValue) => {
-            if (newValue && newValue.length != 10) this.setState({ signInMobileErrorText: 'Please enter a valid mobile number.' });
+            if (newValue && newValue.length !== 10) this.setState({ signInMobileErrorText: 'Please enter a valid mobile number.' });
             else if (newValue) this.setState({ signInMobileErrorText: '' });
         }
         const style = {
@@ -203,8 +176,8 @@ class Login extends Component {
 
         const linkStyle = {
             color: 'rgb(255, 64, 129)',
-            'font-size': '15px',
-            'padding-right': '15px'
+            fontSize: '15px',
+            paddingRight: '15px'
         }
 
         const styles = {
@@ -243,13 +216,6 @@ class Login extends Component {
             />,
         ];
 
-        const confirmationDialogActions = [
-            <FlatButton
-                label="Dismiss"
-                primary={true}
-                onClick={this.closeDialog}
-            />
-        ]
 
         const signInDialogStyle = {
             width: '400px',
@@ -276,7 +242,7 @@ class Login extends Component {
         }
 
         if (this.state.redirect) {
-            return <Redirect to="/"/>;
+            return <Redirect to="/" />;
         }
 
         return (
@@ -284,14 +250,14 @@ class Login extends Component {
                 <MuiThemeProvider>
 
                     <Paper style={style} zDepth={1} rounded={false}>
-                        <AppBar iconClassNameLeft="icon-left"
+                        <AppBar
                             title={<span style={styles.title}>Expense Manager</span>}
                             iconElementRight={<FlatButton label="Sign Up" onClick={() => {
                                 this.setState({ showSignInDialog: true });
                             }} />}
                             iconElementLeft={<div style={{ display: 'none' }} />}
                         />
-                        <div className="login-page">
+                        <div id="loginPage" className="login-page">
                             <TextField fullWidth={true} id="userName" errorStyle={{ fontFamily: 'verdana' }} onChange={onUserNameChange}
                                 floatingLabelText="username or email" errorText={this.state.userNameErrorText} />
                             <TextField fullWidth={true} id="password" floatingLabelText="password" errorStyle={{ fontFamily: 'verdana' }} type="password" onChange={onPasswordChange}
@@ -332,7 +298,7 @@ class Login extends Component {
                         <CircularProgress style={spinnerStyle} size={30} thickness={3} />
                     </Dialog>
                 </MuiThemeProvider>
-               
+
 
                 <MuiThemeProvider>
                     <Dialog
@@ -351,6 +317,15 @@ class Login extends Component {
         )
 
 
+    }
+
+    componentDidMount() {
+        const loginPage = document.getElementById("loginPage");
+        loginPage.addEventListener("keydown", (e) => {
+            if (e.keyCode === 13) {/**Enter key */
+                this.doLogin();
+            }
+        })
     }
 }
 
